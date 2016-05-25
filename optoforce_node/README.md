@@ -23,7 +23,7 @@ Depending on the OptoForce FT sensor data to be visualized, a different topic ha
 
 rqt_plot /optoforce_node/wrench_IRE005/wrench/force
 
-rqt_plot /optoforce_node//wrench_IRE005/wrench/torque
+rqt_plot /optoforce_node/wrench_IRE005/wrench/torque
 
 
 * IRE004 OptoForce device
@@ -32,3 +32,12 @@ rqt_plot /optoforce_node/wrench_/wrench/force
 
 rqt_plot /optoforce_node/wrench_/wrench/torque
 
+* to plot the data with gnuplot:
+'''
+set datafile separator ";" 
+plot "test_optoforce_node_IRE005_forces.csv" using 1:2 with lines title "Fx(N)", "test_optoforce_node_IRE005_forces.csv" using 1:3 with lines title "Fy(N)", "test_optoforce_node_IRE005_forces.csv" using 1:4 with lines title "Fz(N)"
+'''
+'''
+set datafile separator ";" 
+plot "test_optoforce_node_IRE005_forces.csv" using 1:5 with lines title "Tx(Nm)", "test_optoforce_node_IRE005_forces.csv" using 1:6 with lines title "Ty(Nm)", "test_optoforce_node_IRE005_forces.csv" using 1:7 with lines title "Tz(Nm)"
+'''
