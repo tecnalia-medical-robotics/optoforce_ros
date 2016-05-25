@@ -227,12 +227,12 @@ int main(int argc, char* argv[])
   ros::init(argc, argv, "optoforce_node");
   ROS_INFO_STREAM("Node name is:" << ros::this_node::getName());
   //ROS_ERROR_STREAM("Bye");
-  
+
   optoforce_node optoforce_node;
 
   if (optoforce_node.init() < 0)
   {
-    std::cout << "optoforce_node could not be init" << std::endl;
+    std::cout << "optoforce_node could not be initialized" << std::endl;
   }
   else
   {
