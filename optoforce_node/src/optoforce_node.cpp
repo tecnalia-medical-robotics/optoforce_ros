@@ -96,11 +96,16 @@ int optoforce_node::init()
   std::vector<std::string> serial_numbers;
   force_acquisition_->getSerialNumbers(serial_numbers);
 
-  std::string publisher_name = "wrench_" + serial_numbers[0];
-  wrench_pub_[0] = nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1);
-
-  publisher_name = "wrench_" + serial_numbers[1];
-  wrench_pub_[1] = nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1);
+  if (connectedDAQs_ > 0 )
+  {
+    std::string publisher_name = "wrench_" + serial_numbers[0];
+    wrench_pub_[0] = nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1);
+  }
+  if (connectedDAQs_ > 0 && connectedDAQs_ == 2)
+  {
+    std::string publisher_name = "wrench_" + serial_numbers[1];
+    wrench_pub_[1] = nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1);
+  }
 
 
   return 0;
@@ -118,7 +123,8 @@ int optoforce_node::configure()
   nh_.param<std::string>("filename", filename_, "optoforce_node"); // Loop Rate in Hz
   //filename_ = "test_optoforce_node";
 
-
+  nh_.param("connectedDAQs", connectedDAQs_, 2); // Maximun Number of Samples to be stored
+  //connectedDAQs_ = 2;
 
   acquisition_rate_ = 1000;   // Rate in Hz
   
@@ -128,33 +134,29 @@ int optoforce_node::configure()
   
   filename_ = "test_optoforce_node";
 
-
-
-  connectedDAQs_ = 2;
-
   // List devices names
   ldevice_.clear();
-  ldevice_.push_back("64 v0.9");  // IRE004
-  ldevice_.push_back("95 v1.0");  //IRE005
+  ldevice_.push_back("64 v0.9");  // IRE005
+  ldevice_.push_back("95 v1.0");  //IRE004
 
   lcalib_.clear();
   std::vector<float> calib;
   calib.clear();
-  calib.push_back(92.6);       // IRE004
-  calib.push_back(93.6);       // IRE004
-  calib.push_back(20.12);      // IRE004
-  calib.push_back(5054.3);     // IRE004
-  calib.push_back(5085.4);     // IRE004
-  calib.push_back(6912.5);     // IRE004
+  calib.push_back(92.6);       // IRE005
+  calib.push_back(93.6);       // IRE005
+  calib.push_back(20.12);      // IRE005
+  calib.push_back(5054.3);     // IRE005
+  calib.push_back(5085.4);     // IRE005
+  calib.push_back(6912.5);     // IRE005
   lcalib_.push_back(calib);
 
   calib.clear();
-  calib.push_back(97.78);      // IRE005
-  calib.push_back(101.72);     // IRE005
-  calib.push_back(20.53);      // IRE005
-  calib.push_back(5210.6);     // IRE005
-  calib.push_back(5267.2);     // IRE005
-  calib.push_back(7659.7);     // IRE005
+  calib.push_back(97.78);      // IRE004
+  calib.push_back(101.72);     // IRE004
+  calib.push_back(20.53);      // IRE004
+  calib.push_back(5210.6);     // IRE004
+  calib.push_back(5267.2);     // IRE004
+  calib.push_back(7659.7);     // IRE004
   lcalib_.push_back(calib);
 
 
@@ -178,36 +180,51 @@ int optoforce_node::run()
     latest_samples.clear();
 
     force_acquisition_->getData(latest_samples);
-    //ROS_INFO_STREAM("data size: " << latest_samples.size());
 
     if (latest_samples.size() == connectedDAQs_)
     {
+        bool isDataValid = true;
+
+        // Check if all received data's dimension is 6
+        for (int i = 0; i < latest_samples.size(); i++)
+        {
+          if (latest_samples[i].size() == 6)
+            isDataValid = (isDataValid & true);
+          else
+            isDataValid = (isDataValid & false);
+        }
+
         // Check Force and Torque vector dimension i 6 -> 3 Force and 3 Torque
-        if (latest_samples[0].size() == 6 && latest_samples[1].size() == 6)
+        if (isDataValid)
         {
           wrench_.clear();
 
           geometry_msgs::WrenchStamped wrench;
 
-          wrench.header.stamp = ros::Time::now();
-          wrench.wrench.force.x  = latest_samples[0][0];
-          wrench.wrench.force.y  = latest_samples[0][1];
-          wrench.wrench.force.z  = latest_samples[0][2];
-          wrench.wrench.torque.x = latest_samples[0][3];
-          wrench.wrench.torque.y = latest_samples[0][4];
-          wrench.wrench.torque.z = latest_samples[0][5];
-          wrench_.push_back(wrench);
+          if (connectedDAQs_ > 0 )
+          {
+            wrench.header.stamp = ros::Time::now();
+            wrench.wrench.force.x  = latest_samples[0][0];
+            wrench.wrench.force.y  = latest_samples[0][1];
+            wrench.wrench.force.z  = latest_samples[0][2];
+            wrench.wrench.torque.x = latest_samples[0][3];
+            wrench.wrench.torque.y = latest_samples[0][4];
+            wrench.wrench.torque.z = latest_samples[0][5];
+            wrench_.push_back(wrench);
+            wrench_pub_[0].publish(wrench_[0]);
 
-          wrench.wrench.force.x  = latest_samples[1][0];
-          wrench.wrench.force.y  = latest_samples[1][1];
-          wrench.wrench.force.z  = latest_samples[1][2];
-          wrench.wrench.torque.x = latest_samples[1][3];
-          wrench.wrench.torque.y = latest_samples[1][4];
-          wrench.wrench.torque.z = latest_samples[1][5];
-          wrench_.push_back(wrench);
-
-          wrench_pub_[0].publish(wrench_[0]);
-          wrench_pub_[1].publish(wrench_[1]);
+          }
+          if (connectedDAQs_ > 0 && connectedDAQs_ == 2)
+          {
+            wrench.wrench.force.x  = latest_samples[1][0];
+            wrench.wrench.force.y  = latest_samples[1][1];
+            wrench.wrench.force.z  = latest_samples[1][2];
+            wrench.wrench.torque.x = latest_samples[1][3];
+            wrench.wrench.torque.y = latest_samples[1][4];
+            wrench.wrench.torque.z = latest_samples[1][5];
+            wrench_.push_back(wrench);
+            wrench_pub_[1].publish(wrench_[1]);
+          }
         }
     }
 
