@@ -22,8 +22,22 @@ class optoforce_node {
     //! run
     int run();
 
+    // Flag that enables publishing
+    bool puplish_enable_;
+
+    // Flag that enables storing data
+    bool storeData_enable_;
+
+    // This function must be overwriten by the derived class
+    // Start transmision of data independently of the interface
+    virtual void transmitStart() {};
+
+    // This function must be overwriten by the derived class
+    // Stop transmision of data independently of the interface
+    virtual void transmitStop() {};
 
   private:
+
     // finish node
     void finish();
 

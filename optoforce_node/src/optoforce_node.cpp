@@ -19,6 +19,7 @@ void optoforce_node::finish()
     force_acquisition_ = NULL;
   }
 }
+
 int optoforce_node::init()
 {
 
@@ -96,6 +97,13 @@ int optoforce_node::init()
   std::vector<std::string> serial_numbers;
   force_acquisition_->getSerialNumbers(serial_numbers);
 
+  // By default Do Store publish
+  storeData_enable_ = true;
+
+  // By default DO publish
+  puplish_enable_ = true;
+
+  // Create Publishers
   if (connectedDAQs_ > 0 )
   {
     std::string publisher_name = "wrench_" + serial_numbers[0];
@@ -195,7 +203,7 @@ int optoforce_node::run()
         }
 
         // Check Force and Torque vector dimension i 6 -> 3 Force and 3 Torque
-        if (isDataValid)
+        if (isDataValid && puplish_enable_)
         {
           wrench_.clear();
 
@@ -232,7 +240,9 @@ int optoforce_node::run()
     loop_rate.sleep();
   }
   force_acquisition_->stopRecording();
-  force_acquisition_->storeData();
+
+  if (storeData_enable_)
+    force_acquisition_->storeData();
 
   // finish program
   finish();
