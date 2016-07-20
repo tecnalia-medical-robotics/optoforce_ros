@@ -23,4 +23,5 @@ class optoforce_action_server : public optoforce_node {
 
   private:
 
+    actionlib::SimpleActionServer<optoforce_ros/OptoForceAction.h> as_;
 };
