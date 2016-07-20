@@ -249,23 +249,23 @@ int optoforce_node::run()
   return 0;
 }
 
-int main(int argc, char* argv[])
-{
-  ros::init(argc, argv, "optoforce_node");
-  ROS_INFO_STREAM("Node name is:" << ros::this_node::getName());
-  //ROS_ERROR_STREAM("Bye");
+//int main(int argc, char* argv[])
+//{
+//  ros::init(argc, argv, "optoforce_node");
+//  ROS_INFO_STREAM("Node name is:" << ros::this_node::getName());
+//  //ROS_ERROR_STREAM("Bye");
 
-  optoforce_node optoforce_node;
+//  optoforce_node optoforce_node;
 
-  if (optoforce_node.init() < 0)
-  {
-    std::cout << "optoforce_node could not be initialized" << std::endl;
-  }
-  else
-  {
-    std::cout << "optoforce_node Correctly initialized" << std::endl;
-    optoforce_node.run();
-  }
-  std::cout << "exit main" << std::endl;
-  return 1;
-}
+//  if (optoforce_node.init() < 0)
+//  {
+//    std::cout << "optoforce_node could not be initialized" << std::endl;
+//  }
+//  else
+//  {
+//    std::cout << "optoforce_node Correctly initialized" << std::endl;
+//    optoforce_node.run();
+//  }
+//  std::cout << "exit main" << std::endl;
+//  return 1;
+//}

@@ -70,33 +70,33 @@ void optoforce_topic::transmitStop()
 }
 
 
-//int main(int argc, char* argv[])
-//{
+int main(int argc, char* argv[])
+{
 
-//  ros::init(argc, argv, "optoforce_topic");
-//  ROS_INFO_STREAM("Node name is:" << ros::this_node::getName());
+  ros::init(argc, argv, "optoforce_topic");
+  ROS_INFO_STREAM("Node name is:" << ros::this_node::getName());
 
-//  optoforce_topic of_topic;
+  optoforce_topic of_topic;
 
-//  if (of_topic.init() < 0)
-//  {
-//    std::cout << "optoforce_topic could not be initialized" << std::endl;
-//  }
-//  else
-//  {
-//    std::cout << "optoforce_topic Correctly initialized" << std::endl;
+  if (of_topic.init() < 0)
+  {
+    std::cout << "optoforce_topic could not be initialized" << std::endl;
+  }
+  else
+  {
+    std::cout << "optoforce_topic Correctly initialized" << std::endl;
 
-//    // Set Flag to Store Data
-//    //of_topic.storeData_enable_ = true;
+    // Set Flag to Store Data
+    //of_topic.storeData_enable_ = true;
 
-//    // Set Flag to enable publishing data
-//    //of_topic.transmitStart();
+    // Set Flag to enable publishing data
+    //of_topic.transmitStart();
 
-//    // Execute main loop of optoforce_node
-//    of_topic.run();
-//  }
-//  std::cout << "exit main" << std::endl;
+    // Execute main loop of optoforce_node
+    of_topic.run();
+  }
+  std::cout << "exit main" << std::endl;
 
-//  return 1;
+  return 1;
 
-//}
+}
