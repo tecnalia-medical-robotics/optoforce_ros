@@ -132,6 +132,7 @@ include_directories(${optoforce_INCLUDE_DIRS})
 include_directories(${omd_INCLUDE_DIRS})
 
 add_executable(optoforce_node src/optoforce_node.cpp)
+add_executable(optoforce_topic src/optoforce_topic.cpp src/optoforce_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -142,6 +143,7 @@ add_executable(optoforce_node src/optoforce_node.cpp)
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(optoforce_node optoforce  ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(optoforce_topic optoforce ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 
 
 #############
