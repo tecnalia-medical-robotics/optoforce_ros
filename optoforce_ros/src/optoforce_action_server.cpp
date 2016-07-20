@@ -12,8 +12,6 @@
  *     store   wrench data
  */
 #include "optoforce_action_server.h"
-#include <OptoForceAction.h>
-#include <actionlib/server/simple_action_server.h>
 
 optoforce_action_server::optoforce_action_server()
 {

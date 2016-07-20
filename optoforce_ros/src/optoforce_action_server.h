@@ -1,4 +1,6 @@
 #include "optoforce_node.h"
+#include <optoforce_ros/OptoForceAction.h>
+#include <actionlib/server/simple_action_server.h>
 
 class optoforce_action_server : public optoforce_node {
 
