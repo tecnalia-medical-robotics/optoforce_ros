@@ -36,6 +36,10 @@ class optoforce_node {
     // Stop transmision of data independently of the interface
     virtual void transmitStop() {};
 
+  protected:
+    std::vector<geometry_msgs::WrenchStamped> wrench_;
+
+
   private:
 
     // finish node
@@ -48,7 +52,6 @@ class optoforce_node {
 
     // Wrench Publisher
     ros::Publisher wrench_pub_[2];
-    std::vector<geometry_msgs::WrenchStamped> wrench_;
 
     // Frequency in which the program will read sensor data
     int acquisition_rate_;

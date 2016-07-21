@@ -144,19 +144,11 @@ int optoforce_node::configure()
 
   // List devices names
   ldevice_.clear();
-  ldevice_.push_back("64 v0.9");  // IRE005
   ldevice_.push_back("95 v1.0");  //IRE004
+  ldevice_.push_back("64 v0.9");  // IRE005
 
   lcalib_.clear();
   std::vector<float> calib;
-  calib.clear();
-  calib.push_back(92.6);       // IRE005
-  calib.push_back(93.6);       // IRE005
-  calib.push_back(20.12);      // IRE005
-  calib.push_back(5054.3);     // IRE005
-  calib.push_back(5085.4);     // IRE005
-  calib.push_back(6912.5);     // IRE005
-  lcalib_.push_back(calib);
 
   calib.clear();
   calib.push_back(97.78);      // IRE004
@@ -165,6 +157,15 @@ int optoforce_node::configure()
   calib.push_back(5210.6);     // IRE004
   calib.push_back(5267.2);     // IRE004
   calib.push_back(7659.7);     // IRE004
+  lcalib_.push_back(calib);
+
+  calib.clear();
+  calib.push_back(92.6);       // IRE005
+  calib.push_back(93.6);       // IRE005
+  calib.push_back(20.12);      // IRE005
+  calib.push_back(5054.3);     // IRE005
+  calib.push_back(5085.4);     // IRE005
+  calib.push_back(6912.5);     // IRE005
   lcalib_.push_back(calib);
 
 

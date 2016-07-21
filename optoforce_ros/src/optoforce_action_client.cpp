@@ -14,7 +14,8 @@ int main(int argc, char** argv)
   optoforce_ros::OptoForceGoal goal;
 
   // Fill in goal here
-  goal.duration = 5;
+  goal.duration = 5000;
+  goal.freq = 1000;
   client.sendGoal(goal);
   client.waitForResult(ros::Duration(5.0));
 

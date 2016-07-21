@@ -30,11 +30,11 @@ void optoforce_action_server::executeCB(const actionlib::SimpleActionServer<opto
 
   int it = 0;
 
-  ros::Rate timer(1.0); // 1Hz timer
+  ros::Rate timer(goal->freq); // 1Hz timer
 
   while (it < goal->duration)
   {
-    ROS_INFO("[optoforce_action_server::executeCB] Running executeCB");
+    //ROS_INFO("[optoforce_action_server::executeCB] Running executeCB");
     if (as_.isPreemptRequested()){
        ROS_WARN("goal cancelled!");
        result_.result = 0;
@@ -43,7 +43,19 @@ void optoforce_action_server::executeCB(const actionlib::SimpleActionServer<opto
     }
     std::vector<float> data;
     data.push_back(0.2);
-    data.push_back(0.7);
+    data.push_back(0.3);
+    //ROS_INFO_STREAM("force: " << wrench_[0].wrench.force.z);
+    /*
+    for (int i = 0; i < 6; i++)
+    {
+        data.push_back(wrench_[0].wrench.force.x);
+        data.push_back(wrench_[0].wrench.force.y);
+        data.push_back(wrench_[0].wrench.force.z);
+        data.push_back(wrench_[0].wrench.torque.x);
+        data.push_back(wrench_[0].wrench.torque.y);
+        data.push_back(wrench_[0].wrench.torque.z);
+    }*/
+
     feedback_.wrench = data;
 
     as_.publishFeedback(feedback_); // send feedback to the action client that requested this goal
