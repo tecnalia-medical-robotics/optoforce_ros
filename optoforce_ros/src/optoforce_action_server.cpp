@@ -13,9 +13,11 @@
  */
 #include "optoforce_action_server.h"
 
-optoforce_action_server::optoforce_action_server()
+optoforce_action_server::optoforce_action_server(std::string name) :
+  as_(nh_, "example_action", boost::bind(&optoforce_action_server::executeCB, this, _1),false),
+  action_name_(name)
 {
-  ros::NodeHandle nh("~");
+  //ros::NodeHandle nh("~");
 
 }
 
@@ -23,7 +25,11 @@ optoforce_action_server::~optoforce_action_server()
 {
 
 }
+void optoforce_action_server::executeCB(const actionlib::SimpleActionServer<optoforce_ros::OptoForceAction>::GoalConstPtr& goal)
+{
 
+
+}
 
 // Inherited virtual method from optoforce_node
 // Start transmision trough topics, only enable the flag
@@ -48,7 +54,8 @@ int main(int argc, char* argv[])
   ros::init(argc, argv, "optoforce_action_server");
   ROS_INFO_STREAM("Node name is:" << ros::this_node::getName());
 
-  optoforce_action_server optoforce_as;
+  std::string action_name = "optoforce_action";
+  optoforce_action_server optoforce_as(action_name);
 
   if (optoforce_as.init() < 0)
   {
