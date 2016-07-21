@@ -131,6 +131,8 @@ include_directories(${Boost_INCLUDE_DIRS})
 #add_executable(optoforce_node src/optoforce_node.cpp)
 add_executable(optoforce_topic src/optoforce_topic.cpp src/optoforce_node.cpp)
 add_executable(optoforce_action_server src/optoforce_action_server.cpp src/optoforce_node.cpp)
+add_executable(optoforce_action_client src/optoforce_action_client.cpp)
+
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
@@ -143,6 +145,8 @@ add_executable(optoforce_action_server src/optoforce_action_server.cpp src/optof
 #target_link_libraries(optoforce_node optoforce  ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(optoforce_topic optoforce ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(optoforce_action_server optoforce ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(optoforce_action_client ${catkin_LIBRARIES})
+
 
 add_dependencies(optoforce_action_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
 

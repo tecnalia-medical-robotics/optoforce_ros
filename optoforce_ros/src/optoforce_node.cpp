@@ -98,10 +98,10 @@ int optoforce_node::init()
   force_acquisition_->getSerialNumbers(serial_numbers);
 
   // By default Do Store publish
-  storeData_enable_ = true;
+  storeData_enable_ = false;
 
   // By default DO publish
-  puplish_enable_ = true;
+  puplish_enable_ = false;
 
   // Create Publishers
   if (connectedDAQs_ > 0 )

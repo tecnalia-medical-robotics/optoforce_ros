@@ -14,11 +14,10 @@
 #include "optoforce_action_server.h"
 
 optoforce_action_server::optoforce_action_server(std::string name) :
-  as_(nh_, "example_action", boost::bind(&optoforce_action_server::executeCB, this, _1),false),
+  as_(nh_, name, boost::bind(&optoforce_action_server::executeCB, this, _1),false),
   action_name_(name)
 {
-  //ros::NodeHandle nh("~");
-
+  as_.start();
 }
 
 optoforce_action_server::~optoforce_action_server()
@@ -27,7 +26,31 @@ optoforce_action_server::~optoforce_action_server()
 }
 void optoforce_action_server::executeCB(const actionlib::SimpleActionServer<optoforce_ros::OptoForceAction>::GoalConstPtr& goal)
 {
+  ROS_INFO("[optoforce_action_server::executeCB] Enter executeCB");
 
+  int it = 0;
+
+  ros::Rate timer(1.0); // 1Hz timer
+
+  while (it < goal->duration)
+  {
+    ROS_INFO("[optoforce_action_server::executeCB] Running executeCB");
+    if (as_.isPreemptRequested()){
+       ROS_WARN("goal cancelled!");
+       result_.result = 0;
+       as_.setAborted(result_); // tell the client we have given up on this goal; send the result message as well
+       return; // done with callback
+    }
+    std::vector<float> data;
+    data.push_back(0.2);
+    data.push_back(0.7);
+    feedback_.wrench = data;
+
+    as_.publishFeedback(feedback_); // send feedback to the action client that requested this goal
+
+    it++;
+    timer.sleep();
+  }
 
 }
 
@@ -54,7 +77,7 @@ int main(int argc, char* argv[])
   ros::init(argc, argv, "optoforce_action_server");
   ROS_INFO_STREAM("Node name is:" << ros::this_node::getName());
 
-  std::string action_name = "optoforce_action";
+  std::string action_name = "action_server";
   optoforce_action_server optoforce_as(action_name);
 
   if (optoforce_as.init() < 0)
