@@ -39,14 +39,16 @@ class optoforce_node {
   protected:
     std::vector<geometry_msgs::WrenchStamped> wrench_;
 
+    //! ROS node handler
+    ros::NodeHandle nh_;
+
 
   private:
 
     // finish node
     void finish();
 
-    // ROS node handler
-    ros::NodeHandle nh_;
+
 
     OptoforceAcquisition * force_acquisition_;
 

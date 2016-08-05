@@ -37,9 +37,11 @@ int optoforce_node::init()
 
   for (int i = 0; i < connectedDAQs_; ++i)
   {
+    std::cout << "ldevice[" << i << "] " << ldevice_[i] << std::endl;
+
     if (!force_acquisition_->isDeviceConnected(ldevice_[i]))
     {
-      std::cerr << "Could not find device " << ldevice_[i] << std::endl;
+      std::cerr << "[optoforce_initi]Could not find device " << ldevice_[i] << std::endl;
       std::cerr << "Quitting the application." << std::endl;
       finish();
     }
@@ -66,6 +68,7 @@ int optoforce_node::init()
   // Configure FT Calibration
   for (int i = 0; i < connectedDAQs_; ++i)
   {
+    std::cout << "[optoforce_node::init]" << std::endl;
     if (!force_acquisition_->setDeviceCalibration(ldevice_[i], lcalib_[i]))
     {
       std::cerr << "Could not setDeviceCalibration" << std::endl;
@@ -128,7 +131,7 @@ int optoforce_node::configure()
   nh_.param("num_samples", num_samples_, 150000); // Maximun Number of Samples to be stored
   //num_samples_ = 10000; // Maximun Number of Samples to be stored
 
-  nh_.param<std::string>("filename", filename_, "optoforce_node"); // Loop Rate in Hz
+  nh_.param<std::string>("filename", filename_, "/tmp/optoforce_node"); // Loop Rate in Hz
   //filename_ = "test_optoforce_node";
 
   nh_.param("connectedDAQs", connectedDAQs_, 2); // Maximun Number of Samples to be stored
@@ -144,9 +147,10 @@ int optoforce_node::configure()
 
   // List devices names
   ldevice_.clear();
-  ldevice_.push_back("95 v1.0");  //IRE004
-  ldevice_.push_back("64 v0.9");  // IRE005
-
+  //ldevice_.push_back("95 v1.0");  //IRE004
+  //ldevice_.push_back("64 v0.9");  // IRE005
+  ldevice_.push_back("IRE004");  //IRE004
+  ldevice_.push_back("IRE005");  //IRE005
   lcalib_.clear();
   std::vector<float> calib;
 
@@ -200,7 +204,7 @@ int optoforce_node::run()
           if (latest_samples[i].size() == 6)
             isDataValid = (isDataValid & true);
           else
-            isDataValid = (isDataValid & false);
+            isDataValid = false;
         }
 
         // Check Force and Torque vector dimension i 6 -> 3 Force and 3 Torque

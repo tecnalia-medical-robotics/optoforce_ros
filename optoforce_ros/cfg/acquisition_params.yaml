@@ -8,4 +8,4 @@ num_samples: 120000
 loop_rate: 100
 
 # Desired devices to connect
-connectedDAQs: 1
+connectedDAQs: 2

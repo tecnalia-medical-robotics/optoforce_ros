@@ -15,14 +15,14 @@
 
 optoforce_topic::optoforce_topic()
 {
-  ros::NodeHandle nh("~");
+  //ros::NodeHandle nh("~");
 
-  subs_[0] = nh.subscribe("enable_publish",
+  subs_[0] = nh_.subscribe("enable_publish",
                            1,
                            &optoforce_topic::enablePublishCB,
                            this);
 
-  subs_[1] = nh.subscribe("enable_store",
+  subs_[1] = nh_.subscribe("enable_store",
                            1,
                            &optoforce_topic::enableStoreCB,
                            this);
