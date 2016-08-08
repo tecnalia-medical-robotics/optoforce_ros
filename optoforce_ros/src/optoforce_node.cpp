@@ -146,9 +146,6 @@ int optoforce_node::configure()
   // Loop over each device to extract the name
   for (int i = 0; i < connectedDAQs_; ++i)
   {
-      std::string device_name;
-      int speed;
-
       XmlRpc::XmlRpcValue& device_data = devices_list[i];
 
       if(device_data.getType() == XmlRpc::XmlRpcValue::TypeStruct)
@@ -156,8 +153,7 @@ int optoforce_node::configure()
         // Get Name
         if (device_data.hasMember("name"))
         {
-          device_name = (std::string)device_data["name"];
-          device_list_[i].name = device_name;
+          device_list_[i].name = (std::string)device_data["name"];
         }
         else
         {
@@ -179,7 +175,8 @@ int optoforce_node::configure()
         if (device_data.hasMember("calibration"))
         {
             calib_list = device_data["calibration"];
-            for (int j = 0; j < calib_list.size(); j++){
+            for (int j = 0; j < calib_list.size(); j++)
+            {
                 ROS_ASSERT(calib_list[j].getType() == XmlRpc::XmlRpcValue::TypeDouble);
                 device_list_[i].calib.push_back(static_cast<double>(calib_list[j]));
             }
@@ -197,7 +194,8 @@ int optoforce_node::configure()
         if (device_data.hasMember("force_transformation"))
         {
             force_trans_list = device_data["force_transformation"];
-            for (int j = 0; j < force_trans_list.size(); j++){
+            for (int j = 0; j < force_trans_list.size(); j++)
+            {
                 ROS_ASSERT(force_trans_list[j].getType() == XmlRpc::XmlRpcValue::TypeInt);
                 device_list_[i].F_trans.push_back(static_cast<int>(force_trans_list[j]));
             }
@@ -215,7 +213,8 @@ int optoforce_node::configure()
         if (device_data.hasMember("torque_transformation"))
         {
             torque_trans_list = device_data["torque_transformation"];
-            for (int j = 0; j < torque_trans_list.size(); j++){
+            for (int j = 0; j < torque_trans_list.size(); j++)
+            {
                 ROS_ASSERT(torque_trans_list[j].getType() == XmlRpc::XmlRpcValue::TypeInt);
                 device_list_[i].T_trans.push_back(static_cast<int>(torque_trans_list[j]));
             }
