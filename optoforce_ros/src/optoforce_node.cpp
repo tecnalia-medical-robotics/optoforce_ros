@@ -228,9 +228,6 @@ int optoforce_node::configure()
           }
         }
       }
-
-    //ROS_ASSERT(my_list[i].getType() == XmlRpc::XmlRpcValue::TypeString);
-    //lstatic_trained_files.push_back(static_cast<std::string>(my_list[i]));
   }
   for (int j = 0; j < connectedDAQs_; j++)
   {
