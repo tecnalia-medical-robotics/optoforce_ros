@@ -1,3 +1,15 @@
+/**
+ * @file   optoforce_node.h
+ * @author Asier Fernandez <asier.fernandez@tecnalia.com>
+ * @date   2016
+ *
+ * Copyright 2016 Tecnalia Research and Innovation.
+ *
+ * @brief Base ros node.
+ *          Initialize ROS node
+ *          Read parameters from ROS parameter Server
+ *          Initialize OptoForce devices
+ */
 #include <optoforce/optoforce_acquisition.hpp>
 
 #include <iostream>
@@ -16,64 +28,72 @@ class optoforce_node {
     //! init
     int init();
 
-    //! configure
+    //! configure node
+    //! Read Parameters from parameter server
     int configure();
 
     //! run
     int run();
 
-    // Flag that enables publishing
+    //! Flag that enables publishing
     bool puplish_enable_;
 
-    // Flag that enables storing data
+    //! Flag that enables storing data
     bool storeData_enable_;
 
-    // This function must be overwriten by the derived class
-    // Start transmision of data independently of the interface
+    //! This function must be overwriten by the derived class
+    //! Start transmision of data independently of the interface
     virtual void transmitStart() {};
 
-    // This function must be overwriten by the derived class
-    // Stop transmision of data independently of the interface
+    //! This function must be overwriten by the derived class
+    //! Stop transmision of data independently of the interface
     virtual void transmitStop() {};
 
   protected:
+    //! wrench data
     std::vector<geometry_msgs::WrenchStamped> wrench_;
 
     //! ROS node handler
     ros::NodeHandle nh_;
 
+    //! Struct containing each sensor related parameters
+    struct SensorConfig {
+      std::string name;
+      int speed;
+      std::vector<float> calib;
+      std::vector<int> F_trans;
+      std::vector<int> T_trans;
+    };
+
+    //! List of all connected devices parameters
+    std::vector<SensorConfig> device_list_;
 
   private:
 
-    // finish node
+    //! finish node
     void finish();
-
-
 
     OptoforceAcquisition * force_acquisition_;
 
-    // Wrench Publisher
-    ros::Publisher wrench_pub_[2];
-
-    // Frequency in which the program will read sensor data
+    //! Frequency in which the program will read sensor data
     int acquisition_rate_;
 
-    // Publish frequency
+    //! Publish frequency
     int loop_rate_;
 
-    // Number of devices connected
+    //! Number of devices connected
     int connectedDAQs_;
 
-    // Senor's transmission frequency
+    //! Sensor's transmission frequency
     int transmission_speed_;
 
-    // Sensor Filter
+    //! Sensor Filter
     int filter_;
 
-    // File where data will be stored
+    //! File where data will be stored
     std::string filename_;
 
-    // Samples to be stored
+    //! Samples to be stored
     int num_samples_;
 
     std::vector<std::string> ldevice_;

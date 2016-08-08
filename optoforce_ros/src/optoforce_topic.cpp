@@ -15,7 +15,18 @@
 
 optoforce_topic::optoforce_topic()
 {
-  //ros::NodeHandle nh("~");
+  /*
+  // Create Publishers
+  if (connectedDAQs_ > 0 )
+  {
+    std::string publisher_name = "wrench_" + serial_numbers[0];
+    wrench_pub_[0] = nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1);
+  }
+  if (connectedDAQs_ > 0 && connectedDAQs_ == 2)
+  {
+    std::string publisher_name = "wrench_" + serial_numbers[1];
+    wrench_pub_[1] = nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1);
+  }*/
 
   subs_[0] = nh_.subscribe("enable_publish",
                            1,

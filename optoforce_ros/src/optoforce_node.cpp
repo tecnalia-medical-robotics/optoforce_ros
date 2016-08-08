@@ -106,36 +106,156 @@ int optoforce_node::init()
   // By default DO publish
   puplish_enable_ = false;
 
-  // Create Publishers
-  if (connectedDAQs_ > 0 )
-  {
-    std::string publisher_name = "wrench_" + serial_numbers[0];
-    wrench_pub_[0] = nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1);
-  }
-  if (connectedDAQs_ > 0 && connectedDAQs_ == 2)
-  {
-    std::string publisher_name = "wrench_" + serial_numbers[1];
-    wrench_pub_[1] = nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1);
-  }
 
 
   return 0;
 }
 
-// Read
+// Read Parameters from parameter server
 int optoforce_node::configure()
 {
-  nh_.param("loop_rate", loop_rate_, 100); // Loop Rate in Hz
-  loop_rate_ = 100; // Loop Rate in Hz
+  ROS_INFO("READING CONFIGURATION FILE");
 
-  nh_.param("num_samples", num_samples_, 150000); // Maximun Number of Samples to be stored
-  //num_samples_ = 10000; // Maximun Number of Samples to be stored
+  nh_.param("loop_rate", loop_rate_, 100); // Loop Rate in Hz. Default 100
+
+  nh_.param("num_samples", num_samples_, 150000); // Maximun Number of Samples to be stored. Default 150000
 
   nh_.param<std::string>("filename", filename_, "/tmp/optoforce_node"); // Loop Rate in Hz
-  //filename_ = "test_optoforce_node";
 
   nh_.param("connectedDAQs", connectedDAQs_, 2); // Maximun Number of Samples to be stored
-  //connectedDAQs_ = 2;
+
+  XmlRpc::XmlRpcValue devices_list;
+  if (!nh_.getParam("devices", devices_list))
+  {
+    ROS_ERROR_STREAM("Parameter devices undefined");
+    return -1;
+  }
+  if (devices_list.getType() != XmlRpc::XmlRpcValue::TypeArray)
+  {
+    ROS_WARN("Parameter 'devices_list' is not an array");
+    return -1;
+  }
+  //ROS_ASSERT(devices_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
+  ROS_INFO_STREAM("number of devices_list: " << devices_list.size());
+
+  // Initialize variable to store all devices information
+  device_list_.clear();
+  device_list_.resize(devices_list.size());
+  connectedDAQs_ = devices_list.size();
+
+  // Loop over each device to extract the name
+  for (int i = 0; i < connectedDAQs_; ++i)
+  {
+      std::string device_name;
+      int speed;
+
+      XmlRpc::XmlRpcValue& device_data = devices_list[i];
+
+      if(device_data.getType() == XmlRpc::XmlRpcValue::TypeStruct)
+      {
+        // Get Name
+        if (device_data.hasMember("name"))
+        {
+          device_name = (std::string)device_data["name"];
+          device_list_[i].name = device_name;
+        }
+        else
+        {
+          device_list_[i].name = "unknown";
+        }
+
+        // Get Speed
+        if (device_data.hasMember("speed"))
+        {
+          device_list_[i].speed = (int)device_data["speed"];
+        }
+        else
+        {
+          device_list_[i].speed = 1000;
+        }
+
+        // Get Calibration matrix
+        XmlRpc::XmlRpcValue calib_list;
+        if (device_data.hasMember("calibration"))
+        {
+            calib_list = device_data["calibration"];
+            for (int j = 0; j < calib_list.size(); j++){
+                ROS_ASSERT(calib_list[j].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+                device_list_[i].calib.push_back(static_cast<double>(calib_list[j]));
+            }
+        }
+        else
+        {
+          for (int j = 0; j < 6; j++)
+          {
+            device_list_[i].F_trans.push_back(1);
+          }
+        }
+
+        // Get Force Transformation matrix
+        XmlRpc::XmlRpcValue force_trans_list;
+        if (device_data.hasMember("force_transformation"))
+        {
+            force_trans_list = device_data["force_transformation"];
+            for (int j = 0; j < force_trans_list.size(); j++){
+                ROS_ASSERT(force_trans_list[j].getType() == XmlRpc::XmlRpcValue::TypeInt);
+                device_list_[i].F_trans.push_back(static_cast<int>(force_trans_list[j]));
+            }
+        }
+        else
+        {
+          for (int j = 0; j < 9; j++)
+          {
+            device_list_[i].F_trans.push_back(1);
+          }
+        }
+
+        // Get Torque Transformation matrix
+        XmlRpc::XmlRpcValue torque_trans_list;
+        if (device_data.hasMember("torque_transformation"))
+        {
+            torque_trans_list = device_data["torque_transformation"];
+            for (int j = 0; j < torque_trans_list.size(); j++){
+                ROS_ASSERT(torque_trans_list[j].getType() == XmlRpc::XmlRpcValue::TypeInt);
+                device_list_[i].T_trans.push_back(static_cast<int>(torque_trans_list[j]));
+            }
+        }
+        else
+        {
+          for (int j = 0; j < 9; j++)
+          {
+            device_list_[i].T_trans.push_back(1);
+          }
+        }
+      }
+
+    //ROS_ASSERT(my_list[i].getType() == XmlRpc::XmlRpcValue::TypeString);
+    //lstatic_trained_files.push_back(static_cast<std::string>(my_list[i]));
+  }
+  for (int j = 0; j < connectedDAQs_; j++)
+  {
+    std::cout << "device " << j << std::endl;
+    std::cout << "  name: " << device_list_[j].name << std::endl;
+    std::cout << "  speed: " << device_list_[j].speed << std::endl;
+    std::cout << "  calib: [ ";
+    for (int k = 0; k < device_list_[j].calib.size(); k ++)
+    {
+      std::cout << device_list_[j].calib[k] << " ";
+    }
+    std::cout << "]" << std::endl;
+    std::cout << "  F_trans: [ ";
+    for (int k = 0; k < device_list_[j].F_trans.size(); k ++)
+    {
+      std::cout << device_list_[j].F_trans[k] << " ";
+    }
+    std::cout << "]" << std::endl;
+    std::cout << "  T_trans: [ ";
+    for (int k = 0; k < device_list_[j].T_trans.size(); k ++)
+    {
+      std::cout << device_list_[j].T_trans[k] << " ";
+    }
+    std::cout << "]" << std::endl;
+  }
 
   acquisition_rate_ = 1000;   // Rate in Hz
   
@@ -214,6 +334,7 @@ int optoforce_node::run()
 
           geometry_msgs::WrenchStamped wrench;
 
+          /*
           if (connectedDAQs_ > 0 )
           {
             wrench.header.stamp = ros::Time::now();
@@ -238,6 +359,7 @@ int optoforce_node::run()
             wrench_.push_back(wrench);
             wrench_pub_[1].publish(wrench_[1]);
           }
+          */
         }
     }
 
