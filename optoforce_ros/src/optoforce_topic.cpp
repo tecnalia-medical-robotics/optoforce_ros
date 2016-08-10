@@ -25,6 +25,7 @@ optoforce_topic::~optoforce_topic()
 void optoforce_topic::optoforce_ros_interface()
 {
   std::cout << "[optoforce_ros_interface]connectedDAQs_" << connectedDAQs_ << std::endl;
+
   // Create Publishers
   for (int i = 0; i < connectedDAQs_; i++)
   {
@@ -73,8 +74,12 @@ void optoforce_topic::startRecordingCB(const std_msgs::Bool::ConstPtr& msg)
     force_acquisition_->startRecording();
 
   else if (msg->data == false)
+  {
+    if (force_acquisition_->isRecording())
     force_acquisition_->stopRecording();
     force_acquisition_->storeData();
+    puplish_enable_ = false;
+  }
 }
 // Inherited virtual method from optoforce_node
 // Start transmision trough topics, only enable the flag
@@ -151,12 +156,6 @@ int main(int argc, char* argv[])
   else
   {
     std::cout << "[optoforce_topic] optoforce_topic Correctly initialized" << std::endl;
-
-    // Set Flag to Store Data
-    //of_topic.storeData_enable_ = true;
-
-    // Set Flag to enable publishing data
-    //of_topic.transmitStart();
 
     // Add ROS Publisher and Subscribers
     of_topic.optoforce_ros_interface();
