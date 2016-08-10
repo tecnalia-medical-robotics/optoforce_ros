@@ -27,6 +27,15 @@ class optoforce_topic : public optoforce_node {
     //! Destructor
     ~optoforce_topic();
 
+    //! Function that implements ROS inteface
+    //! Add ROS Publisher and Subscribers
+    void optoforce_ros_interface();
+
+    //! Inherited virtual method from optoforce_node
+    //! Start transmision trough topics, only enable the flag
+    int run ();
+
+
     //! Inherited virtual method from optoforce_node
     //! Start transmision trough topics, only enable the flag
     void transmitStart ();
@@ -45,9 +54,9 @@ class optoforce_topic : public optoforce_node {
     ros::Subscriber subs_[2];
 
     //! Calback enable/disable publishing topic
-    void enablePublishCB(const std_msgs::Bool::ConstPtr& msg);
+    void startPublishingCB(const std_msgs::Bool::ConstPtr& msg);
 
     //! Calback enable/disable storing data to file when accquisition finish
-    void enableStoreCB(const std_msgs::Bool::ConstPtr& msg);
+    void startRecordingCB(const std_msgs::Bool::ConstPtr& msg);
 
 };

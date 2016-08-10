@@ -1,14 +1,11 @@
 # File where data will be stored
-filename: "test_optoforce_node"
+filename: "/tmp/optoforce_topic"
 
 # Maximun number of samples to be stored
-num_samples: 120000
+num_samples: 160000
 
 # Publish frequency
 loop_rate: 100
-
-# Desired devices to connect
-connectedDAQs: 2
 
 # OptoForce Sensors to be opened
 devices:

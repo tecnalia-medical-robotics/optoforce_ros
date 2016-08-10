@@ -12,6 +12,11 @@ optoforce_node::~optoforce_node()
 void optoforce_node::finish()
 {
   std::cout << "FINISH program" << std::endl;
+  if (force_acquisition_->isRecording())
+  {
+    force_acquisition_->stopRecording();
+    force_acquisition_->storeData();
+  }
 
   if (force_acquisition_ != NULL)
   {
@@ -23,11 +28,13 @@ void optoforce_node::finish()
 int optoforce_node::init()
 {
 
+  std::cout << "Looking for " << connectedDAQs_ << " connected DAQ " << std::endl;
+  force_acquisition_ = new OptoforceAcquisition();
+
   // Read configuration file
   configure();
 
-  std::cout << "Looking for " << connectedDAQs_ << " connected DAQ " << std::endl;
-  force_acquisition_ = new OptoforceAcquisition();
+  force_acquisition_->setDesiredNumberSamples(num_samples_);
 
   if (!force_acquisition_->initDevices(connectedDAQs_))
   {
@@ -102,6 +109,7 @@ int optoforce_node::init()
 
   // By default Do Store publish
   storeData_enable_ = false;
+  storeData_cmd_ = false;
 
   // By default DO publish
   puplish_enable_ = false;
@@ -122,8 +130,6 @@ int optoforce_node::configure()
 
   nh_.param<std::string>("filename", filename_, "/tmp/optoforce_node"); // Loop Rate in Hz
 
-  nh_.param("connectedDAQs", connectedDAQs_, 2); // Maximun Number of Samples to be stored
-
   XmlRpc::XmlRpcValue devices_list;
   if (!nh_.getParam("devices", devices_list))
   {
@@ -135,13 +141,18 @@ int optoforce_node::configure()
     ROS_WARN("Parameter 'devices_list' is not an array");
     return -1;
   }
-  //ROS_ASSERT(devices_list.getType() == XmlRpc::XmlRpcValue::TypeArray);
-  ROS_INFO_STREAM("number of devices_list: " << devices_list.size());
 
   // Initialize variable to store all devices information
   device_list_.clear();
   device_list_.resize(devices_list.size());
+
   connectedDAQs_ = devices_list.size();
+
+  // List of devices names
+  ldevice_.clear();
+
+  // List of calibration matrix
+  lcalib_.clear();
 
   // Loop over each device to extract the name
   for (int i = 0; i < connectedDAQs_; ++i)
@@ -180,6 +191,7 @@ int optoforce_node::configure()
                 ROS_ASSERT(calib_list[j].getType() == XmlRpc::XmlRpcValue::TypeDouble);
                 device_list_[i].calib.push_back(static_cast<double>(calib_list[j]));
             }
+            lcalib_.push_back(device_list_[i].calib);
         }
         else
         {
@@ -226,8 +238,15 @@ int optoforce_node::configure()
             device_list_[i].T_trans.push_back(1);
           }
         }
+
+        ldevice_.push_back(device_list_[i].name);
+        lspeed_.push_back(device_list_[i].speed);
+
       }
   }
+  ROS_INFO_STREAM("num_samples: " << num_samples_);
+  ROS_INFO_STREAM("loop_rate: " << loop_rate_);
+
   for (int j = 0; j < connectedDAQs_; j++)
   {
     std::cout << "device " << j << std::endl;
@@ -254,44 +273,8 @@ int optoforce_node::configure()
   }
 
   acquisition_rate_ = 1000;   // Rate in Hz
-  
-  transmission_speed_ = 1000; // Rate in Hz
-  
   filter_ = 15; // in Hz
   
-  filename_ = "test_optoforce_node";
-
-  // List devices names
-  ldevice_.clear();
-  //ldevice_.push_back("95 v1.0");  //IRE004
-  //ldevice_.push_back("64 v0.9");  // IRE005
-  ldevice_.push_back("IRE004");  //IRE004
-  ldevice_.push_back("IRE005");  //IRE005
-  lcalib_.clear();
-  std::vector<float> calib;
-
-  calib.clear();
-  calib.push_back(97.78);      // IRE004
-  calib.push_back(101.72);     // IRE004
-  calib.push_back(20.53);      // IRE004
-  calib.push_back(5210.6);     // IRE004
-  calib.push_back(5267.2);     // IRE004
-  calib.push_back(7659.7);     // IRE004
-  lcalib_.push_back(calib);
-
-  calib.clear();
-  calib.push_back(92.6);       // IRE005
-  calib.push_back(93.6);       // IRE005
-  calib.push_back(20.12);      // IRE005
-  calib.push_back(5054.3);     // IRE005
-  calib.push_back(5085.4);     // IRE005
-  calib.push_back(6912.5);     // IRE005
-  lcalib_.push_back(calib);
-
-
-  lspeed_.push_back(transmission_speed_);
-  lspeed_.push_back(transmission_speed_);
-
   return 0;
 }
 
@@ -322,41 +305,6 @@ int optoforce_node::run()
           else
             isDataValid = false;
         }
-
-        // Check Force and Torque vector dimension i 6 -> 3 Force and 3 Torque
-        if (isDataValid && puplish_enable_)
-        {
-          wrench_.clear();
-
-          geometry_msgs::WrenchStamped wrench;
-
-          /*
-          if (connectedDAQs_ > 0 )
-          {
-            wrench.header.stamp = ros::Time::now();
-            wrench.wrench.force.x  = latest_samples[0][0];
-            wrench.wrench.force.y  = latest_samples[0][1];
-            wrench.wrench.force.z  = latest_samples[0][2];
-            wrench.wrench.torque.x = latest_samples[0][3];
-            wrench.wrench.torque.y = latest_samples[0][4];
-            wrench.wrench.torque.z = latest_samples[0][5];
-            wrench_.push_back(wrench);
-            wrench_pub_[0].publish(wrench_[0]);
-
-          }
-          if (connectedDAQs_ > 0 && connectedDAQs_ == 2)
-          {
-            wrench.wrench.force.x  = latest_samples[1][0];
-            wrench.wrench.force.y  = latest_samples[1][1];
-            wrench.wrench.force.z  = latest_samples[1][2];
-            wrench.wrench.torque.x = latest_samples[1][3];
-            wrench.wrench.torque.y = latest_samples[1][4];
-            wrench.wrench.torque.z = latest_samples[1][5];
-            wrench_.push_back(wrench);
-            wrench_pub_[1].publish(wrench_[1]);
-          }
-          */
-        }
     }
 
     ros::spinOnce();
@@ -364,14 +312,22 @@ int optoforce_node::run()
   }
   force_acquisition_->stopRecording();
 
-  if (storeData_enable_)
-    force_acquisition_->storeData();
-
   // finish program
   finish();
   return 0;
 }
+// Whatever the recording state is, top it.
+// This way all previously get data will be discarded.
+void optoforce_node::storeStart()
+{
+  force_acquisition_->startRecording();
 
+}
+void optoforce_node::storeStop()
+{
+    force_acquisition_->stopRecording();
+
+}
 //int main(int argc, char* argv[])
 //{
 //  ros::init(argc, argv, "optoforce_node");

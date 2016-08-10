@@ -33,13 +33,16 @@ class optoforce_node {
     int configure();
 
     //! run
-    int run();
+    //! This function must be overwriten by the derived class
+    //! Start transmision of data independently of the interface
+    virtual int run();
 
     //! Flag that enables publishing
     bool puplish_enable_;
 
     //! Flag that enables storing data
     bool storeData_enable_;
+    bool storeData_cmd_;
 
     //! This function must be overwriten by the derived class
     //! Start transmision of data independently of the interface
@@ -49,12 +52,21 @@ class optoforce_node {
     //! Stop transmision of data independently of the interface
     virtual void transmitStop() {};
 
+    void storeStart();
+    void storeStop();
+
   protected:
-    //! wrench data
-    std::vector<geometry_msgs::WrenchStamped> wrench_;
+
+    OptoforceAcquisition * force_acquisition_;
 
     //! ROS node handler
     ros::NodeHandle nh_;
+
+    //! Number of devices connected
+    int connectedDAQs_;
+
+    //! Publish frequency
+    int loop_rate_;
 
     //! Struct containing each sensor related parameters
     struct SensorConfig {
@@ -73,16 +85,8 @@ class optoforce_node {
     //! finish node
     void finish();
 
-    OptoforceAcquisition * force_acquisition_;
-
     //! Frequency in which the program will read sensor data
     int acquisition_rate_;
-
-    //! Publish frequency
-    int loop_rate_;
-
-    //! Number of devices connected
-    int connectedDAQs_;
 
     //! Sensor's transmission frequency
     int transmission_speed_;
