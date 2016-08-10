@@ -7,10 +7,11 @@ project(optoforce_ros)
 find_package(catkin REQUIRED
   roscpp
   geometry_msgs
+  genmsg
+  actionlib_msgs
+  actionlib
   optoforce
   omd
-  actionlib
-  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
