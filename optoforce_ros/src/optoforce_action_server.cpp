@@ -40,19 +40,21 @@ void optoforce_action_server::run(const ActionServer::GoalConstPtr& goal)
 {
 
   ROS_INFO("[optoforce_action_server::run] Enter runCB");
+  ROS_INFO_STREAM("[optoforce_action_server::run] goal store: " << static_cast<int>(goal->store));
+  ROS_INFO_STREAM("[optoforce_action_server::run] goal acq_duration: " << goal->acq_duration);
+  ROS_INFO_STREAM("[optoforce_action_server::run] goal publish_freq: " << goal->publish_freq);
 
-  int it = 0;
+  // Start Force Sensor Acquisition
+  force_acquisition_->startRecording();
 
   ros::Rate timer(goal->publish_freq); // 1Hz timer
   geometry_msgs::WrenchStamped wrench;
   std::vector< std::vector<float> > latest_samples;
 
-  ros::Time time_actual = ros::Time::now();
+  double time_end = ros::Time::now().toNSec() + goal->acq_duration*1000000;
 
-  while (it < goal->acq_duration)
+  while (ros::ok() && (ros::Time::now().toNSec() < time_end) )
   {
-      std::cout << "time: "<< ros::Time::now();
-      ROS_INFO("[optoforce_action_server::run] while in runCB");
       if (as_->isPreemptRequested()){
          ROS_WARN("goal cancelled!");
          result_.result = 0;
@@ -62,40 +64,56 @@ void optoforce_action_server::run(const ActionServer::GoalConstPtr& goal)
 
       latest_samples.clear();
       force_acquisition_->getData(latest_samples);
+
       feedback_.wrench_lst.clear();
-
-      if (connectedDAQs_ > 0 )
+      if (latest_samples.size() == connectedDAQs_ )
       {
-        wrench.header.stamp = ros::Time::now();
-        wrench.wrench.force.x  = latest_samples[0][0];
-        wrench.wrench.force.y  = latest_samples[0][1];
-        wrench.wrench.force.z  = latest_samples[0][2];
-        wrench.wrench.torque.x = latest_samples[0][3];
-        wrench.wrench.torque.y = latest_samples[0][4];
-        wrench.wrench.torque.z = latest_samples[0][5];
+        // Check if all received data's dimension is 6
+        bool isDataValid = true;
+        for (int i = 0; i < latest_samples.size(); i++)
+        {
+          if (latest_samples[i].size() == 6)
+            isDataValid = (isDataValid & true);
+          else
+            isDataValid = false;
+        }
 
-        feedback_.wrench_lst.push_back(wrench);
+        if (connectedDAQs_ > 0 && isDataValid)
+        {
+          wrench.header.stamp = ros::Time::now();
+          wrench.wrench.force.x  = latest_samples[0][0];
+          wrench.wrench.force.y  = latest_samples[0][1];
+          wrench.wrench.force.z  = latest_samples[0][2];
+          wrench.wrench.torque.x = latest_samples[0][3];
+          wrench.wrench.torque.y = latest_samples[0][4];
+          wrench.wrench.torque.z = latest_samples[0][5];
+          feedback_.wrench_lst.push_back(wrench);
+        }
+        if (connectedDAQs_ == 2 && isDataValid)
+        {
+          wrench.header.stamp = ros::Time::now();
+          wrench.wrench.force.x  = latest_samples[1][0];
+          wrench.wrench.force.y  = latest_samples[1][1];
+          wrench.wrench.force.z  = latest_samples[1][2];
+          wrench.wrench.torque.x = latest_samples[1][3];
+          wrench.wrench.torque.y = latest_samples[1][4];
+          wrench.wrench.torque.z = latest_samples[1][5];
+          feedback_.wrench_lst.push_back(wrench);
+        }
+        as_->publishFeedback(feedback_); // send feedback to the action client that requested this goal
 
       }
-      if (connectedDAQs_ == 2)
-      {
-        wrench.header.stamp = ros::Time::now();
-        wrench.wrench.force.x  = latest_samples[1][0];
-        wrench.wrench.force.y  = latest_samples[1][1];
-        wrench.wrench.force.z  = latest_samples[1][2];
-        wrench.wrench.torque.x = latest_samples[1][3];
-        wrench.wrench.torque.y = latest_samples[1][4];
-        wrench.wrench.torque.z = latest_samples[1][5];
+      else
+        ROS_INFO("Not valida data received from Force Sensor");
 
-        feedback_.wrench_lst.push_back(wrench);
-
-      }
-
-      as_->publishFeedback(feedback_); // send feedback to the action client that requested this goal
-
-      it++;
       timer.sleep();
     }
+  std::cout << "time finish: " << ros::Time::now().toNSec() << std::endl;
+
+
+  result_.result = 1;
+  as_->setSucceeded(result_);
+  ROS_INFO("[optoforce_action_server::run] Finish loop");
 }
 
 void optoforce_action_server::executeCB(const actionlib::SimpleActionServer<optoforce_ros::OptoForceAction>::GoalConstPtr& goal)
@@ -175,8 +193,7 @@ int main(int argc, char* argv[])
     // Add Actionlib ROS Interface
     optoforce_as.add_ros_interface();
 
-    // Execute loop
-    //optoforce_as.run();
+    ros::spin();
   }
   std::cout << "exit main" << std::endl;
 

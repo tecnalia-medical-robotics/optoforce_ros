@@ -1,6 +1,6 @@
 #goal definition
 bool store
-int32 acq_duration
+float64 acq_duration
 int32 publish_freq
 ---
 #result definition
