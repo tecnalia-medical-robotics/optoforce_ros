@@ -46,6 +46,8 @@ void optoforce_action_server::run(const ActionServer::GoalConstPtr& goal)
 
   // Start Force Sensor Acquisition
   force_acquisition_->startRecording();
+  if (goal->store)
+    force_acquisition_->setAutoStore(true);
 
   ros::Rate timer(goal->publish_freq); // 1Hz timer
   geometry_msgs::WrenchStamped wrench;
@@ -55,59 +57,61 @@ void optoforce_action_server::run(const ActionServer::GoalConstPtr& goal)
 
   while (ros::ok() && (ros::Time::now().toNSec() < time_end) )
   {
-      if (as_->isPreemptRequested()){
-         ROS_WARN("goal cancelled!");
-         result_.result = 0;
-         as_->setAborted(result_); // tell the client we have given up on this goal; send the result message as well
-         return; // done with callback
-      }
-
-      latest_samples.clear();
-      force_acquisition_->getData(latest_samples);
-
-      feedback_.wrench_lst.clear();
-      if (latest_samples.size() == connectedDAQs_ )
-      {
-        // Check if all received data's dimension is 6
-        bool isDataValid = true;
-        for (int i = 0; i < latest_samples.size(); i++)
-        {
-          if (latest_samples[i].size() == 6)
-            isDataValid = (isDataValid & true);
-          else
-            isDataValid = false;
-        }
-
-        if (connectedDAQs_ > 0 && isDataValid)
-        {
-          wrench.header.stamp = ros::Time::now();
-          wrench.wrench.force.x  = latest_samples[0][0];
-          wrench.wrench.force.y  = latest_samples[0][1];
-          wrench.wrench.force.z  = latest_samples[0][2];
-          wrench.wrench.torque.x = latest_samples[0][3];
-          wrench.wrench.torque.y = latest_samples[0][4];
-          wrench.wrench.torque.z = latest_samples[0][5];
-          feedback_.wrench_lst.push_back(wrench);
-        }
-        if (connectedDAQs_ == 2 && isDataValid)
-        {
-          wrench.header.stamp = ros::Time::now();
-          wrench.wrench.force.x  = latest_samples[1][0];
-          wrench.wrench.force.y  = latest_samples[1][1];
-          wrench.wrench.force.z  = latest_samples[1][2];
-          wrench.wrench.torque.x = latest_samples[1][3];
-          wrench.wrench.torque.y = latest_samples[1][4];
-          wrench.wrench.torque.z = latest_samples[1][5];
-          feedback_.wrench_lst.push_back(wrench);
-        }
-        as_->publishFeedback(feedback_); // send feedback to the action client that requested this goal
-
-      }
-      else
-        ROS_INFO("Not valida data received from Force Sensor");
-
-      timer.sleep();
+    if (as_->isPreemptRequested()){
+       ROS_WARN("goal cancelled!");
+       result_.result = 0;
+       as_->setAborted(result_); // tell the client we have given up on this goal; send the result message as well
+       return; // done with callback
     }
+
+    latest_samples.clear();
+    force_acquisition_->getData(latest_samples);
+
+    feedback_.wrench_lst.clear();
+    if (latest_samples.size() == connectedDAQs_ )
+    {
+      // Check if all received data's dimension is 6
+      bool isDataValid = true;
+      for (int i = 0; i < latest_samples.size(); i++)
+      {
+        if (latest_samples[i].size() == 6)
+          isDataValid = (isDataValid & true);
+        else
+          isDataValid = false;
+      }
+
+      if (connectedDAQs_ > 0 && isDataValid)
+      {
+        wrench.header.stamp = ros::Time::now();
+        wrench.wrench.force.x  = latest_samples[0][0];
+        wrench.wrench.force.y  = latest_samples[0][1];
+        wrench.wrench.force.z  = latest_samples[0][2];
+        wrench.wrench.torque.x = latest_samples[0][3];
+        wrench.wrench.torque.y = latest_samples[0][4];
+        wrench.wrench.torque.z = latest_samples[0][5];
+        feedback_.wrench_lst.push_back(wrench);
+      }
+      if (connectedDAQs_ == 2 && isDataValid)
+      {
+        wrench.header.stamp = ros::Time::now();
+        wrench.wrench.force.x  = latest_samples[1][0];
+        wrench.wrench.force.y  = latest_samples[1][1];
+        wrench.wrench.force.z  = latest_samples[1][2];
+        wrench.wrench.torque.x = latest_samples[1][3];
+        wrench.wrench.torque.y = latest_samples[1][4];
+        wrench.wrench.torque.z = latest_samples[1][5];
+        feedback_.wrench_lst.push_back(wrench);
+      }
+      as_->publishFeedback(feedback_); // send feedback to the action client that requested this goal
+
+    }
+    else
+      ROS_INFO("Not valida data received from Force Sensor");
+
+    timer.sleep();
+  }
+  force_acquisition_->stopRecording();
+
   std::cout << "time finish: " << ros::Time::now().toNSec() << std::endl;
 
 

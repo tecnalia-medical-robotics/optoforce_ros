@@ -1,7 +1,19 @@
 /********************************************
  * This program adds an interface through topics to:
- *   enable publishing topics
- *   enable store data to file when accquisition finish
+ * ROS Subscribers
+ *   start_publishing:
+ *      true:   if acquisition not started, start new acquisition and publish data.
+ *              if acquisition started, publish data.
+ *      false:  if acquisition started, stop acquisition and stop publishing.
+ *              if acquisition not started, do nothing
+ *   start_new_acquisition:
+ *      true:   if acquisition not started, start new acquisition.
+ *              if acquisition started, stop previous acquisition and start new acquisition.
+ *      false:  if acquisition not started, do nothing
+ *              if acquisition started, stop previous acquisition
+ *   auto_store:
+ *      true:   store data after an acquisition finishes
+ *      false:  do not store data after an acquisition finishes
  *
  * The program inherits optoforce_node, which:
  *   reads parameters from ROS parameter server
@@ -42,6 +54,21 @@ void optoforce_topic::add_ros_interface()
                            1,
                            &optoforce_topic::startRecordingCB,
                            this);
+  subs_[2] = nh_.subscribe("auto_store",
+                           1,
+                           &optoforce_topic::autoStoreCB,
+                           this);
+}
+
+// Calback enable/disable publishing topic
+void optoforce_topic::autoStoreCB(const std_msgs::Bool::ConstPtr& msg)
+{
+  ROS_INFO_STREAM("[optoforce_topic::autoStoreCB] data: " << int(msg->data));
+
+  if (msg->data == true)
+    force_acquisition_->setAutoStore(true);
+  else
+    force_acquisition_->setAutoStore(false);
 }
 
 // Calback enable/disable publishing topic
@@ -77,7 +104,7 @@ void optoforce_topic::startRecordingCB(const std_msgs::Bool::ConstPtr& msg)
   {
     if (force_acquisition_->isRecording())
     force_acquisition_->stopRecording();
-    force_acquisition_->storeData();
+    //force_acquisition_->storeData();
     puplish_enable_ = false;
   }
 }
