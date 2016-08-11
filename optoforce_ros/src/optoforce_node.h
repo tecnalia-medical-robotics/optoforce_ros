@@ -46,6 +46,10 @@ class optoforce_node {
 
     //! This function must be overwriten by the derived class
     //! Start transmision of data independently of the interface
+    void add_ros_interface(){};
+
+    //! This function must be overwriten by the derived class
+    //! Start transmision of data independently of the interface
     virtual void transmitStart() {};
 
     //! This function must be overwriten by the derived class

@@ -22,7 +22,7 @@ optoforce_topic::~optoforce_topic()
 {
 
 }
-void optoforce_topic::optoforce_ros_interface()
+void optoforce_topic::add_ros_interface()
 {
   std::cout << "[optoforce_ros_interface]connectedDAQs_" << connectedDAQs_ << std::endl;
 
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
     std::cout << "[optoforce_topic] optoforce_topic Correctly initialized" << std::endl;
 
     // Add ROS Publisher and Subscribers
-    of_topic.optoforce_ros_interface();
+    of_topic.add_ros_interface();
 
     // Execute main loop of optoforce_node
     of_topic.run();

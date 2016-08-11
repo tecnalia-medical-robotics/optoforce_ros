@@ -1,9 +1,10 @@
 #goal definition
-int32 duration
-int32 freq
+bool store
+int32 acq_duration
+int32 publish_freq
 ---
 #result definition
 int32 result
 ---
 #feedback
-float32[] wrench
+geometry_msgs/WrenchStamped[] wrench_lst

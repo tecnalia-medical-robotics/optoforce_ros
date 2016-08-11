@@ -27,9 +27,10 @@ class optoforce_topic : public optoforce_node {
     //! Destructor
     ~optoforce_topic();
 
-    //! Function that implements ROS inteface
+    //! Inherited virtual method from optoforce_node
+    //! Start transmision trough topics, only enable the flag
     //! Add ROS Publisher and Subscribers
-    void optoforce_ros_interface();
+    void add_ros_interface();
 
     //! Inherited virtual method from optoforce_node
     //! Start transmision trough topics, only enable the flag
