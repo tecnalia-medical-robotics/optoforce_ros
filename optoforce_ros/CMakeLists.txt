@@ -148,8 +148,9 @@ target_link_libraries(optoforce_topic optoforce ${Boost_LIBRARIES} ${catkin_LIBR
 target_link_libraries(optoforce_action_server optoforce ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(optoforce_action_client ${catkin_LIBRARIES})
 
-
-add_dependencies(optoforce_action_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(optoforce_action_client ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(optoforce_action_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#${PROJECT_NAME}_gencpp
 
 
 #############
