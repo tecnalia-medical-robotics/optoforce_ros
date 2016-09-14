@@ -128,6 +128,8 @@ catkin_package(
 include_directories(${optoforce_INCLUDE_DIRS})
 include_directories(${omd_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${catkin_INCLUDE_DIRS})
+
 
 #add_executable(optoforce_node src/optoforce_node.cpp)
 add_executable(optoforce_topic src/optoforce_topic.cpp src/optoforce_node.cpp)
@@ -148,9 +150,9 @@ target_link_libraries(optoforce_topic optoforce ${Boost_LIBRARIES} ${catkin_LIBR
 target_link_libraries(optoforce_action_server optoforce ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(optoforce_action_client ${catkin_LIBRARIES})
 
-
+add_dependencies(optoforce_topic ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_dependencies(optoforce_action_server ${${PROJECT_NAME}_EXPORTED_TARGETS})
-
+add_dependencies(optoforce_action_client ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 #############
 ## Install ##
