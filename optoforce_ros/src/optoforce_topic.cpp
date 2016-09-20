@@ -103,9 +103,10 @@ void optoforce_topic::startRecordingCB(const std_msgs::Bool::ConstPtr& msg)
   else if (msg->data == false)
   {
     if (force_acquisition_->isRecording())
-    force_acquisition_->stopRecording();
+      force_acquisition_->stopRecording();
     //force_acquisition_->storeData();
-    puplish_enable_ = false;
+    if (puplish_enable_)
+      force_acquisition_->startRecording();
   }
 }
 // Inherited virtual method from optoforce_node
@@ -119,32 +120,30 @@ int optoforce_topic::run()
   while(ros::ok())
   {
     // It is assumed that, callback function enables acquisition
-    if (puplish_enable_)
+    if (puplish_enable_ && force_acquisition_->isRecording())
     {
       latest_samples.clear();
+      //std::cout << "**************************************size: " << latest_samples.size() << std::endl;
       force_acquisition_->getData(latest_samples);
-
-      if (connectedDAQs_ > 0 )
+      //std::cout << "**************************************size: " << latest_samples.size() << std::endl;;
+      //std::cout << "**************************************size: " << latest_samples[0].size() << std::endl;;
+      //std::cout << "**************************************size: " << latest_samples[1].size() << std::endl;;
+      if ( latest_samples.size() == connectedDAQs_)
       {
-        wrench.header.stamp = ros::Time::now();
-        wrench.wrench.force.x  = latest_samples[0][0];
-        wrench.wrench.force.y  = latest_samples[0][1];
-        wrench.wrench.force.z  = latest_samples[0][2];
-        wrench.wrench.torque.x = latest_samples[0][3];
-        wrench.wrench.torque.y = latest_samples[0][4];
-        wrench.wrench.torque.z = latest_samples[0][5];
-        wrench_pub_[0].publish(wrench);
-      }
-      if (connectedDAQs_ == 2)
-      {
-        wrench.header.stamp = ros::Time::now();
-        wrench.wrench.force.x  = latest_samples[1][0];
-        wrench.wrench.force.y  = latest_samples[1][1];
-        wrench.wrench.force.z  = latest_samples[1][2];
-        wrench.wrench.torque.x = latest_samples[1][3];
-        wrench.wrench.torque.y = latest_samples[1][4];
-        wrench.wrench.torque.z = latest_samples[1][5];
-        wrench_pub_[1].publish(wrench);
+        for (int i = 0; i < connectedDAQs_; i++)
+        {
+          if (latest_samples[i].size() == 6)
+          {
+            wrench.header.stamp = ros::Time::now();
+            wrench.wrench.force.x  = latest_samples[i][0];
+            wrench.wrench.force.y  = latest_samples[i][1];
+            wrench.wrench.force.z  = latest_samples[i][2];
+            wrench.wrench.torque.x = latest_samples[i][3];
+            wrench.wrench.torque.y = latest_samples[i][4];
+            wrench.wrench.torque.z = latest_samples[i][5];
+            wrench_pub_[i].publish(wrench);    
+          }
+        }
       }
     }
 
