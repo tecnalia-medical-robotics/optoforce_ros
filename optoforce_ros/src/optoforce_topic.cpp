@@ -32,7 +32,7 @@ optoforce_topic::optoforce_topic()
 
 optoforce_topic::~optoforce_topic()
 {
-
+  start_recording_ = false;
 }
 void optoforce_topic::add_ros_interface()
 {
@@ -63,12 +63,14 @@ void optoforce_topic::add_ros_interface()
 // Calback enable/disable publishing topic
 void optoforce_topic::autoStoreCB(const std_msgs::Bool::ConstPtr& msg)
 {
+  /*
   ROS_INFO_STREAM("[optoforce_topic::autoStoreCB] data: " << int(msg->data));
 
   if (msg->data == true)
     force_acquisition_->setAutoStore(true);
   else
     force_acquisition_->setAutoStore(false);
+   */
 }
 
 // Calback enable/disable publishing topic
@@ -76,37 +78,55 @@ void optoforce_topic::startPublishingCB(const std_msgs::Bool::ConstPtr& msg)
 {
   ROS_INFO_STREAM("[optoforce_topic::startPublishingCB] data: " << int(msg->data));
 
-  if (msg->data == true)
+  puplish_enable_ = msg->data;
+
+  if (puplish_enable_)
   {
-    if (!force_acquisition_->isRecording())
+    if (!force_acquisition_->isReading())
     {
       ROS_INFO("[optoforce_topic::startPublishingCB] start acq");
-      force_acquisition_->startRecording();
+      force_acquisition_->startReading();
     }
-
-    puplish_enable_ = true;
     //transmitStart();
   }
-  else if (msg->data == false)
+  else
+  {
     puplish_enable_ = false;
     //transmitStop();
+  }
 }
 
 // Calback enable/disable storing data to file when accquisition finish
 void optoforce_topic::startRecordingCB(const std_msgs::Bool::ConstPtr& msg)
 {
-  ROS_INFO_STREAM("[optoforce_topic::enableStoreCB] data: " << int(msg->data));
+  ROS_INFO_STREAM("[optoforce_topic::startRecordingCB] data: " << int(msg->data));
 
-  if (msg->data == true)
-    force_acquisition_->startRecording();
+  start_recording_ = msg->data;
 
+  if (start_recording_)
+  {
+   if (!force_acquisition_->isRecording())
+   {
+     ROS_INFO("[optoforce_topic::startRecordingCB] is not Recording. START RECORDING");
+     force_acquisition_->startRecording();
+   }
+   else
+   {
+     ROS_INFO("[optoforce_topic::startRecordingCB] is not Reading. proceed to start reading and recording data");
+     ROS_INFO("[optoforce_topic::startRecordingCB] STOP RECORDING");
+     force_acquisition_->stopRecording();
+     ROS_INFO("[optoforce_topic::startRecordingCB] START RECORDING");
+     force_acquisition_->startRecording();
+   }
+
+  }
   else if (msg->data == false)
   {
     if (force_acquisition_->isRecording())
+    {
+      ROS_INFO("[optoforce_topic::startRecordingCB] is Recording. proceed to stop recording and save data ");
       force_acquisition_->stopRecording();
-    //force_acquisition_->storeData();
-    if (puplish_enable_)
-      force_acquisition_->startRecording();
+    }
   }
 }
 // Inherited virtual method from optoforce_node
@@ -119,8 +139,10 @@ int optoforce_topic::run()
 
   while(ros::ok())
   {
+
+    bool publish_enable = false;
     // It is assumed that, callback function enables acquisition
-    if (puplish_enable_ && force_acquisition_->isRecording())
+    if(puplish_enable_ && force_acquisition_->isReading() )
     {
       latest_samples.clear();
       //std::cout << "**************************************size: " << latest_samples.size() << std::endl;

@@ -64,5 +64,7 @@ class optoforce_topic : public optoforce_node {
     //! Calback enable/disable auto-storing data after an acquisition starts
     void autoStoreCB(const std_msgs::Bool::ConstPtr& msg);
 
+    bool start_recording_;
+
 
 };
