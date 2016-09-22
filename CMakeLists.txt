@@ -13,7 +13,7 @@ find_package(catkin REQUIRED
   optoforce
   omd
 )
-
+include_directories(${catkin_INCLUDE_DIRS})
 ## System dependencies are found with CMake's conventions
 find_package( Boost REQUIRED COMPONENTS system chrono)
 
@@ -57,8 +57,8 @@ add_executable(optoforce_action_node src/optoforce_action_server.cpp src/optofor
 add_executable(optoforce_action_client_example src/optoforce_action_client.cpp)
 
 
-target_link_libraries(optoforce_node optoforce ${Boost_LIBRARIES} ${catkin_LIBRARIES})
-target_link_libraries(optoforce_action_node optoforce ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(optoforce_node ${optoforce_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(optoforce_action_node ${optoforce_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(optoforce_action_client_example ${catkin_LIBRARIES})
 
 ## Add cmake target dependencies of the library
