@@ -1,15 +1,13 @@
-/********************************************
- * This program adds an interface through topics to:
- *   enable publishing topics
- *   enable store data to file when accquisition finish
+/**
+ * @file   optoforce_action_server.cpp
+ * @author Asier Fernandez <asier.fernandez@tecnalia.com>
+ * @date   2016
  *
- * The program inherits optoforce_node, which:
- *   reads parameters from ROS parameter server
- *   initialize  optoforce driver
- *   get periodically wrench data
- *   if configured can:
- *     publish wrench data
- *     store   wrench data
+ * Copyright 2016 Tecnalia Research & Innovation.
+ * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ *
+ * @brief Basic OptoForce ROS action server
+ *
  */
 #include "optoforce_action_server.h"
 

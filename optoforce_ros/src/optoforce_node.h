@@ -3,13 +3,15 @@
  * @author Asier Fernandez <asier.fernandez@tecnalia.com>
  * @date   2016
  *
- * Copyright 2016 Tecnalia Research and Innovation.
+ * Copyright 2016 Tecnalia Research & Innovation.
+ * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
  *
- * @brief Base ros node.
+ * @brief Basic ROS node. Add an interface to OptoForce driver
  *          Initialize ROS node
  *          Read parameters from ROS parameter Server
  *          Initialize OptoForce devices
  */
+
 #include <optoforce/optoforce_acquisition.hpp>
 
 #include <iostream>

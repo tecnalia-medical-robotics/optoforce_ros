@@ -1,3 +1,14 @@
+/**
+ * @file   optoforce_action_server.h
+ * @author Asier Fernandez <asier.fernandez@tecnalia.com>
+ * @date   2016
+ *
+ * Copyright 2016 Tecnalia Research & Innovation.
+ * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ *
+ * @brief Basic OptoForce ROS action server
+ *
+ */
 #include "optoforce_node.h"
 #include <actionlib/server/simple_action_server.h>
 #include <optoforce_ros/OptoForceAction.h>

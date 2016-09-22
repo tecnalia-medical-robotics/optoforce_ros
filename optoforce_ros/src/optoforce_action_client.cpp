@@ -1,3 +1,14 @@
+/**
+ * @file   optoforce_action_client.cpp
+ * @author Asier Fernandez <asier.fernandez@tecnalia.com>
+ * @date   2016
+ *
+ * Copyright 2016 Tecnalia Research & Innovation.
+ * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ *
+ * @brief Basic ROS action client to communicate with OptoForce action server
+ *
+ */
 #include <optoforce_ros/OptoForceAction.h>
 #include <actionlib/client/simple_action_client.h>
 

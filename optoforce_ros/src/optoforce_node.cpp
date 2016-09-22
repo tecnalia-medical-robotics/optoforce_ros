@@ -1,3 +1,17 @@
+/**
+ * @file   optoforce_node.h
+ * @author Asier Fernandez <asier.fernandez@tecnalia.com>
+ * @date   2016
+ *
+ * Copyright 2016 Tecnalia Research & Innovation.
+ * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ *
+ * @brief Basic ROS node. Add an interface to OptoForce driver
+ *          Initialize ROS node
+ *          Read parameters from ROS parameter Server
+ *          Initialize OptoForce devices
+ */
+
 #include "optoforce_node.h"
 
 optoforce_node::optoforce_node(): nh_("~")

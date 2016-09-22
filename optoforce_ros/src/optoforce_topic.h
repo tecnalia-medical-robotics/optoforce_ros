@@ -1,18 +1,27 @@
 /**
- * @file   optoforce_topic.h
+ * @file   optoforce_node.cpp
  * @author Asier Fernandez <asier.fernandez@tecnalia.com>
  * @date   2016
  *
- * Copyright 2016 Tecnalia Research and Innovation.
+ * Copyright 2016 Tecnalia Research & Innovation.
+ * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
  *
- * @brief Interface trough topics to optoforce_node
- *          ROS Publishers
- *            enable_publish
- *            enable_store
- *          ROS Subscribers
- *            enable_publish
- *            enable_store
+ * @brief OptoForce ROS node with an interface through topics.
+ *        The program inherits optoforce_node, which:
+ *          reads parameters from ROS parameter server
+ *          initialize  optoforce driver
+ *          get periodically wrench data
+ *
+ *        ROS Subscribers. Type std_msgs::Bool
+ *          start_publishing:
+ *            true:   start publishing wrench data
+ *            false:  stop publishing wrench data
+ *          start_new_acquisition:
+ *            true:   start recording data to be stored in a csv file
+ *            false:  stop recording data to be stored in a csv file
+ *
  */
+
 #include "optoforce_node.h"
 #include "std_msgs/Bool.h"
 

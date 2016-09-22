@@ -1,27 +1,25 @@
-/********************************************
- * This program adds an interface through topics to:
- * ROS Subscribers
- *   start_publishing:
- *      true:   if acquisition not started, start new acquisition and publish data.
- *              if acquisition started, publish data.
- *      false:  if acquisition started, stop acquisition and stop publishing.
- *              if acquisition not started, do nothing
- *   start_new_acquisition:
- *      true:   if acquisition not started, start new acquisition.
- *              if acquisition started, stop previous acquisition and start new acquisition.
- *      false:  if acquisition not started, do nothing
- *              if acquisition started, stop previous acquisition
- *   auto_store:
- *      true:   store data after an acquisition finishes
- *      false:  do not store data after an acquisition finishes
+/**
+ * @file   optoforce_node.cpp
+ * @author Asier Fernandez <asier.fernandez@tecnalia.com>
+ * @date   2016
  *
- * The program inherits optoforce_node, which:
- *   reads parameters from ROS parameter server
- *   initialize  optoforce driver
- *   get periodically wrench data
- *   if configured can:
- *     publish wrench data
- *     store   wrench data
+ * Copyright 2016 Tecnalia Research & Innovation.
+ * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ *
+ * @brief OptoForce ROS node with an interface through topics.
+ *        The program inherits optoforce_node, which:
+ *          reads parameters from ROS parameter server
+ *          initialize  optoforce driver
+ *          get periodically wrench data
+ *
+ *        ROS Subscribers. Type std_msgs::Bool
+ *          start_publishing:
+ *            true:   start publishing wrench data
+ *            false:  stop publishing wrench data
+ *          start_new_acquisition:
+ *            true:   start recording data to be stored in a csv file
+ *            false:  stop recording data to be stored in a csv file
+ *
  */
 #include "optoforce_topic.h"
 
