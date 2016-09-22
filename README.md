@@ -53,3 +53,11 @@ The node can save data in a csv file, and a easy way to plot this csv file is us
 set datafile separator ";" 
 plot "filename.csv" using 1:2 with lines title "Fx(N)", "filename.csv" using 1:3 with lines title "Fy(N)", "filename.csv" using 1:4 with lines title "Fz(N)"
 ```
+
+## Related Projetcs
+
+OptoForce: [EtherDAQ ROS driver](https://github.com/OptoForce/etherdaq_ros)
+
+Shadow Robot: [ROS-Serial driver](https://github.com/shadow-robot/optoforce/blob/indigo-devel/optoforce/src/optoforce/optoforce.py)
+
+LARICS-Lab: [OMD based ROS driver](https://github.com/larics/optoforce-ros-pusblisher)
