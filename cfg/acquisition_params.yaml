@@ -2,22 +2,28 @@
 filename: "/tmp/optoforce_topic"
 
 # Maximun number of samples to be stored
-num_samples: 160000
+num_samples: 600000
 
 # Publish frequency
-loop_rate: 100
+loop_rate: 100 # Frecuency in Hz, in which topics will be published
+
+# Acquisition frecuency
+acquisition_freq: 1000    # Frecuency in Hz, in which the program will read from DAQ
+                          # This frequency has to be equal of faster than OptoForce Transmission speed
 
 # OptoForce Sensors to be opened.
 devices:
 
   - name: "IRE005"                                          # Serial Number of the Device. IRE005 Blue Box
     calibration: [92.6,93.6,20.12,5054.3,5085.4,6912.5]     # IRE005 Calibration from Sensitivity Report
-    speed: 1000                                             # Transmission frequency in Hz
+    speed: 1000                                             # OptoForce DAQ Transmission frequency in Hz
+    filter: 15                                              # TO BE implemented. 150Hz, 50Hz, 15Hz, NoFilter are suppported
     force_transformation:  [ 0, 1, 0, -1, 0, 0, 0, 0, -1]   # TO BE implemented
     torque_transformation: [ 0, 1, 0,  1, 0, 0, 0, 0,  1]   # TO BE implemented
 
 #  - name: "IRE004"                                          # Serial Number of the Device. IRE004 Black Box
 #    calibration: [97.78,101.72,20.53,5210.6,5267.2,7659.7]  # IRE004 Calibration from Sensitivity Report
 #    speed: 1000                                             # Transmission frequency in Hz
+#    filter: 15                                              # TO BE implemented. 150Hz, 50Hz, 15Hz, NoFilter are suppported  
 #    force_transformation:  [ 0, -1, 0, -1, 0, 0, 0, 0, 1]   # TO BE implemented
 #    torque_transformation: [ 0, -1, 0,  1, 0, 0, 0, 0, 1]   # TO BE implemented

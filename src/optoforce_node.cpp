@@ -140,7 +140,9 @@ int optoforce_node::configure()
 
   nh_.param("loop_rate", loop_rate_, 100); // Loop Rate in Hz. Default 100
 
-  nh_.param("num_samples", num_samples_, 150000); // Maximun Number of Samples to be stored. Default 150000
+  nh_.param("acquisition_freq", acquisition_rate_, 1000); // Loop Rate in Hz. Default 100
+
+  nh_.param("num_samples", num_samples_, 600000); // Maximun Number of Samples to be stored. Default 600000
 
   nh_.param<std::string>("filename", filename_, "/tmp/optoforce_node"); // Loop Rate in Hz
 
@@ -286,7 +288,6 @@ int optoforce_node::configure()
     std::cout << "]" << std::endl;
   }
 
-  acquisition_rate_ = 1000;   // Rate in Hz
   filter_ = 15; // in Hz
   
   return 0;
