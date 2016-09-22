@@ -1,46 +1,46 @@
 ## Description
 
-This ROS package adds topic and action based interface to the optoforce_driver developed in Tecnalia.
-[https link for package](http://gitsrvbav01/git/Repository/optoforce)
+This ROS package adds topic and action based interface to the optoforce driver developed in Tecnalia.
+[https link for package](https://github.com/tecnalia-medical-robotics/optoforce.git)
 
-git link: http://gitsrvbav01/git/optoforce.git
 
 ## Instructions
 
-1. Configuration
-
-Within **cfg** folder **acquisition_params.yaml** file can be found. This file is loaded when *optoforce_node.launch* is executed.
-
+1. Configuration    
+Within **cfg** folder **acquisition_params.yaml** file can be found. This file is loaded when *optoforce_node.launch* is executed.    
 **acquisition_params.yaml** contains all relevant configuration parameters that can be modified.
-It's important to point that as many as defined devices have to be phisically plugged in order to execute properly.
+It's important to point that as many as defined devices have to be phisically plugged in order to execute properly.    
+Two type of acquisition frequencies can be modified:
 
-2. Execution
+    ```
+# Publish frequency
+loop_rate: 100 # Frecuency in Hz, in which topics will be published
 
+# Acquisition frecuency
+acquisition_freq: 1000    # Frecuency in Hz, in which the program will read from DAQ
+                          # This frequency has to be equal of faster than OptoForce Transmission speed
+
+# OptoForce Sensors to be opened.
+device:
+	- name: "device_name"
+      speed: 1000           # OptoForce DAQ Transmission frequency in Hz
+```    
+2. Basic usage    
 roslaunch optoforce_node optoforce_node.launch
 
 3. Plot
 
-Depending on the OptoForce FT sensor data to be visualized, a different topic has to be choosen.
+* Using rqt_plot    
+For example, for a IRE005 OptoForce device
 
-* IRE005 OptoForce device
-
+    ```
 rqt_plot /optoforce_node/wrench_IRE005/wrench/force
-
 rqt_plot /optoforce_node/wrench_IRE005/wrench/torque
+    ```
+* Using gnuplot:    
+The node can save data in a csv file, and a easy way to plot this csv file is using gnuplot
 
-
-* IRE004 OptoForce device
-
-rqt_plot /optoforce_node/wrench_/wrench/force
-
-rqt_plot /optoforce_node/wrench_/wrench/torque
-
-* to plot the data with gnuplot:
-'''
+    ```
 set datafile separator ";" 
-plot "test_optoforce_node_IRE005_forces.csv" using 1:2 with lines title "Fx(N)", "test_optoforce_node_IRE005_forces.csv" using 1:3 with lines title "Fy(N)", "test_optoforce_node_IRE005_forces.csv" using 1:4 with lines title "Fz(N)"
-'''
-'''
-set datafile separator ";" 
-plot "test_optoforce_node_IRE005_forces.csv" using 1:5 with lines title "Tx(Nm)", "test_optoforce_node_IRE005_forces.csv" using 1:6 with lines title "Ty(Nm)", "test_optoforce_node_IRE005_forces.csv" using 1:7 with lines title "Tz(Nm)"
-'''
+plot "filename.csv" using 1:2 with lines title "Fx(N)", "filename.csv" using 1:3 with lines title "Fy(N)", "filename.csv" using 1:4 with lines title "Fz(N)"
+    ```
