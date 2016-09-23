@@ -1,7 +1,6 @@
 # Description
 
-This ROS package adds topic and action based interface to the optoforce driver developed in Tecnalia.
-[https link for package](https://github.com/tecnalia-medical-robotics/optoforce.git)
+This ROS package adds topic and action based interface to the [optoforce driver](https://github.com/tecnalia-medical-robotics/optoforce.git) developed in Tecnalia.
 
 # Instructions
 
@@ -19,19 +18,25 @@ Two type of acquisition frequencies can be modified:
 loop_rate: 100 # Frecuency in Hz, in which topics will be published
 
 # Acquisition frecuency
-acquisition_freq: 1000    # Frecuency in Hz, in which the program will read from DAQ
-                          # This frequency has to be equal of faster than OptoForce Transmission speed
+# Frecuency in Hz, in which the program will read from DAQ
+# This frequency has to be equal of faster than OptoForce Transmission speed
+acquisition_freq: 1000
 
 # OptoForce Sensors to be opened.
 device:
 	- name: "device_name"
-      speed: 1000           # OptoForce DAQ Transmission frequency in Hz
+    # OptoForce DAQ Transmission frequency in Hz
+    speed: 1000
 ```
 
 ### Basic usage
-
+Th following commands are used to get the read wrench published as WrenchStamped
 ```bash
-roslaunch optoforce_node optoforce_node.launch
+roslaunch optoforce_ros optoforce_node.launch
+# for activating the WrenchStamped publication
+rostopic pub /optoforce_node/start_publishing std_msgs/Bool "data: true"
+# for stopping the publication
+rostopic pub /optoforce_node/start_publishing std_msgs/Bool "data: false"
 ```
 
 ### Plot
