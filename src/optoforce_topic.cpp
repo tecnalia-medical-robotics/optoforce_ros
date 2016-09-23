@@ -32,6 +32,7 @@ optoforce_topic::~optoforce_topic()
 {
   start_recording_ = false;
 }
+
 void optoforce_topic::add_ros_interface()
 {
   std::cout << "[optoforce_ros_interface]connectedDAQs_" << connectedDAQs_ << std::endl;
@@ -155,13 +156,14 @@ int optoforce_topic::run()
           if (latest_samples[i].size() == 6)
           {
             wrench.header.stamp = ros::Time::now();
+            wrench.header.frame_id = device_list_[i].name;
             wrench.wrench.force.x  = latest_samples[i][0];
             wrench.wrench.force.y  = latest_samples[i][1];
             wrench.wrench.force.z  = latest_samples[i][2];
             wrench.wrench.torque.x = latest_samples[i][3];
             wrench.wrench.torque.y = latest_samples[i][4];
             wrench.wrench.torque.z = latest_samples[i][5];
-            wrench_pub_[i].publish(wrench);    
+            wrench_pub_[i].publish(wrench);
           }
         }
       }
