@@ -13,10 +13,10 @@ acquisition_freq: 1000
 
 # OptoForce Sensors to be opened.
 devices:
-# Serial Number of the Device. IRE005 Blue Box
-  - name: "IRE005"
-    # IRE005 Calibration from Sensitivity Report
-    calibration: [92.6,93.6,20.12,5054.3,5085.4,6912.5]
+  # Serial Number of the Device. IRE0A004 Repaired device
+  - name: "IRE0A004"
+    # IRE0A004 Calibration from Sensitivity Report
+    calibration: [183.0,186.06,39.83,7359.85,7324.34,7786.72]
     # OptoForce DAQ Transmission frequency in Hz
     speed: 1000                                        
     # todo implemented. 150Hz, 50Hz, 15Hz, NoFilter are suppported
