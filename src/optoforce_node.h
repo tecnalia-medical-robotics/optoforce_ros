@@ -4,7 +4,8 @@
  * @date   2016
  *
  * Copyright 2016 Tecnalia Research & Innovation.
- * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ * Distributed under the GNU GPL v3.
+ * For full terms see https://www.gnu.org/licenses/gpl.txt
  *
  * @brief Basic ROS node. Add an interface to OptoForce driver
  *          Initialize ROS node
@@ -40,7 +41,7 @@ class optoforce_node {
     virtual int run();
 
     //! Flag that enables publishing
-    bool puplish_enable_;
+    bool publish_enable_;
 
     //! Flag that enables storing data
     bool storeData_enable_;
@@ -95,6 +96,7 @@ class optoforce_node {
     int acquisition_rate_;
 
     //! Sensor's transmission frequency
+    // todo(Asier) this flag is never used. Consider removing
     int transmission_speed_;
 
     //! Sensor Filter

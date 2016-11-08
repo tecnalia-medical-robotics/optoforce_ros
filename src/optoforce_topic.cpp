@@ -4,7 +4,8 @@
  * @date   2016
  *
  * Copyright 2016 Tecnalia Research & Innovation.
- * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ * Distributed under the GNU GPL v3.
+ * For full terms see https://www.gnu.org/licenses/gpl.txt
  *
  * @brief OptoForce ROS node with an interface through topics.
  *        The program inherits optoforce_node, which:
@@ -23,7 +24,7 @@
  */
 #include "optoforce_topic.h"
 
-optoforce_topic::optoforce_topic()
+optoforce_topic::optoforce_topic() : start_recording_(false)
 {
 
 }
@@ -35,7 +36,7 @@ optoforce_topic::~optoforce_topic()
 
 void optoforce_topic::add_ros_interface()
 {
-  std::cout << "[optoforce_ros_interface]connectedDAQs_" << connectedDAQs_ << std::endl;
+  ROS_INFO_STREAM("[optoforce_ros_interface]connectedDAQs_" << connectedDAQs_);
 
   // Create Publishers
   for (int i = 0; i < connectedDAQs_; i++)
@@ -57,9 +58,14 @@ void optoforce_topic::add_ros_interface()
                            1,
                            &optoforce_topic::autoStoreCB,
                            this);
+  subs_[3] = nh_.subscribe("reset",
+                           1,
+                           &optoforce_topic::resetCB,
+                           this);
 }
 
-// Calback enable/disable publishing topic
+// todo(Asier) consider remobing the commented code.
+// Callback enable/disable publishing topic
 void optoforce_topic::autoStoreCB(const std_msgs::Bool::ConstPtr& msg)
 {
   /*
@@ -77,9 +83,9 @@ void optoforce_topic::startPublishingCB(const std_msgs::Bool::ConstPtr& msg)
 {
   ROS_INFO_STREAM("[optoforce_topic::startPublishingCB] data: " << int(msg->data));
 
-  puplish_enable_ = msg->data;
+  publish_enable_ = msg->data;
 
-  if (puplish_enable_)
+  if (publish_enable_)
   {
     if (!force_acquisition_->isReading())
     {
@@ -90,12 +96,12 @@ void optoforce_topic::startPublishingCB(const std_msgs::Bool::ConstPtr& msg)
   }
   else
   {
-    puplish_enable_ = false;
+    publish_enable_ = false;
     //transmitStop();
   }
 }
 
-// Calback enable/disable storing data to file when accquisition finish
+// Callback enable/disable storing data to file when accquisition finish
 void optoforce_topic::startRecordingCB(const std_msgs::Bool::ConstPtr& msg)
 {
   ROS_INFO_STREAM("[optoforce_topic::startRecordingCB] data: " << int(msg->data));
@@ -128,6 +134,13 @@ void optoforce_topic::startRecordingCB(const std_msgs::Bool::ConstPtr& msg)
     }
   }
 }
+
+// Calback to reset (to 0) the optoforce sensors readings
+void optoforce_topic::resetCB(const std_msgs::Empty::ConstPtr& msg)
+{
+  force_acquisition_->setZeroAll();
+}
+
 // Inherited virtual method from optoforce_node
 // Start transmision trough topics, only enable the flag
 int optoforce_topic::run()
@@ -138,10 +151,10 @@ int optoforce_topic::run()
 
   while(ros::ok())
   {
-
+    // todo (Asier) why are you defining a local publish_enable that is not used?
     bool publish_enable = false;
     // It is assumed that, callback function enables acquisition
-    if(puplish_enable_ && force_acquisition_->isReading() )
+    if(publish_enable_ && force_acquisition_->isReading() )
     {
       latest_samples.clear();
       //std::cout << "**************************************size: " << latest_samples.size() << std::endl;
@@ -168,7 +181,6 @@ int optoforce_topic::run()
         }
       }
     }
-
     ros::spinOnce();
     loop_rate.sleep();
   }
@@ -178,20 +190,19 @@ int optoforce_topic::run()
 // Start transmision trough topics, only enable the flag
 void optoforce_topic::transmitStart()
 {
-  puplish_enable_ = true;
+  publish_enable_ = true;
 }
 
 // Inherited virtual method from optoforce_node
 // Stop transmision trough topics, only enable the flag
 void optoforce_topic::transmitStop()
 {
-  puplish_enable_ = false;
+  publish_enable_ = false;
 }
 
 
 int main(int argc, char* argv[])
 {
-
   ros::init(argc, argv, "optoforce_topic");
   ROS_INFO_STREAM("[optoforce_topic] Node name is:" << ros::this_node::getName());
 
@@ -199,11 +210,11 @@ int main(int argc, char* argv[])
 
   if (of_topic.init() < 0)
   {
-    std::cout << "[optoforce_topic] optoforce_topic could not be initialized" << std::endl;
+    ROS_ERROR_STREAM("[optoforce_topic] optoforce_topic could not be initialized");
   }
   else
   {
-    std::cout << "[optoforce_topic] optoforce_topic Correctly initialized" << std::endl;
+    ROS_INFO_STREAM("[optoforce_topic] optoforce_topic Correctly initialized");
 
     // Add ROS Publisher and Subscribers
     of_topic.add_ros_interface();
@@ -211,8 +222,7 @@ int main(int argc, char* argv[])
     // Execute main loop of optoforce_node
     of_topic.run();
   }
-  std::cout << "[optoforce_topic] exit main" << std::endl;
+  ROS_INFO_STREAM("[optoforce_topic] exit main");
 
   return 1;
-
 }

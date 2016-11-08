@@ -4,13 +4,15 @@
  * @date   2016
  *
  * Copyright 2016 Tecnalia Research & Innovation.
- * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ * Distributed under the GNU GPL v3.
+ * For full terms see https://www.gnu.org/licenses/gpl.txt
  *
  * @brief Basic OptoForce ROS action server
  *
  */
 #include "optoforce_action_server.h"
 
+// todo(Asier) consider removing this code if not needed.
 /*
 optoforce_action_server::optoforce_action_server(std::string name) :
   as_(nh_, name, boost::bind(&optoforce_action_server::executeCB, this, _1),false),
@@ -19,10 +21,11 @@ optoforce_action_server::optoforce_action_server(std::string name) :
   as_.start();
 }
 */
-optoforce_action_server::optoforce_action_server(std::string name)
+optoforce_action_server::optoforce_action_server(std::string name) : as_name_(name),
+                                                                     as_(NULL)
 {
-  as_name_ = name;
 }
+
 void optoforce_action_server::add_ros_interface()
 {
   //as_ = new ActionServer(nh_, as_name_, boost::bind(&optoforce_action_server::executeCB, this, _1),false);
@@ -118,6 +121,7 @@ void optoforce_action_server::run(const ActionServer::GoalConstPtr& goal)
   ROS_INFO("[optoforce_action_server::run] Finish loop");
 }
 
+// todo(Asier) reconsider the presence of that function that is just empty
 void optoforce_action_server::executeCB(const actionlib::SimpleActionServer<optoforce_ros::OptoForceAction>::GoalConstPtr& goal)
 {
   /*
@@ -162,17 +166,15 @@ void optoforce_action_server::executeCB(const actionlib::SimpleActionServer<opto
 // Start transmision trough topics, only enable the flag
 void optoforce_action_server::transmitStart()
 {
-  puplish_enable_ = true;
+  publish_enable_ = true;
 }
 
 // Inherited virtual method from optoforce_node
 // Stop transmision trough topics, only enable the flag
 void optoforce_action_server::transmitStop()
 {
-  puplish_enable_ = false;
+  publish_enable_ = false;
 }
-
-
 
 
 int main(int argc, char* argv[])

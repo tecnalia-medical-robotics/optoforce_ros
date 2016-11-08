@@ -4,7 +4,8 @@
  * @date   2016
  *
  * Copyright 2016 Tecnalia Research & Innovation.
- * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ * Distributed under the GNU GPL v3.
+ * For full terms see https://www.gnu.org/licenses/gpl.txt
  *
  * @brief Basic ROS node. Add an interface to OptoForce driver
  *          Initialize ROS node
@@ -14,9 +15,18 @@
 
 #include "optoforce_node.h"
 
-optoforce_node::optoforce_node(): nh_("~")
+optoforce_node::optoforce_node(): nh_("~"),
+                                  publish_enable_(false),
+                                  storeData_enable_(false),
+                                  storeData_cmd_(false),
+                                  force_acquisition_(NULL),
+                                  connectedDAQs_(0),
+                                  loop_rate_(100),
+                                  acquisition_rate_(1000),
+                                  transmission_speed_(100),
+                                  filter_(15),
+                                  num_samples_(600000)
 {
-
 }
 
 optoforce_node::~optoforce_node()
@@ -111,7 +121,8 @@ int optoforce_node::init()
   force_acquisition_->setZeroAll();
 
   // Set Acquisition Frequency
-  // This frequency determines how often we get a new data. Independently from Sensor Transmission Rate
+  // This frequency determines how often we get a new data.
+  // Independently from Sensor Transmission Rate
   force_acquisition_->setAcquisitionFrequency(acquisition_rate_);
 
   // Set Filename to Store Data
@@ -126,9 +137,7 @@ int optoforce_node::init()
   storeData_cmd_ = false;
 
   // By default DO publish
-  puplish_enable_ = false;
-
-
+  publish_enable_ = false;
 
   return 0;
 }
@@ -289,7 +298,7 @@ int optoforce_node::configure()
   }
 
   filter_ = 15; // in Hz
-  
+
   return 0;
 }
 
@@ -310,6 +319,7 @@ int optoforce_node::run()
 
     if (latest_samples.size() == connectedDAQs_)
     {
+        // todo(Asier) check why isDataValid is not used
         bool isDataValid = true;
 
         // Check if all received data's dimension is 6
