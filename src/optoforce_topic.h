@@ -56,16 +56,13 @@ class optoforce_topic : public optoforce_node {
   private:
     //! Wrench Publisher
     //! this will not work if we have more than 2 devices connected
-    //! todo(Asier) consider using std::vector instead.
-    ros::Publisher wrench_pub_[2];
+    std::vector<ros::Publisher> wrench_pub_;
 
     //! ROS Subscribers
     //! subs_[0]: start_publishing
     //! subs_[1]: start_new_acquisition
-    //! subs_[2]: auto_store
-    //! todo(Asier) consider using std::vector for enabling quicker addition
-    //! of new subscriber, if needed.
-    ros::Subscriber subs_[4];
+    //! subs_[2]: reset Force and Torque
+    std::vector<ros::Subscriber> subs_;
 
     //! Callback enable/disable publishing topic
     void startPublishingCB(const std_msgs::Bool::ConstPtr& msg);
@@ -73,14 +70,12 @@ class optoforce_topic : public optoforce_node {
     //! Callback enable/disable new acquisition
     void startRecordingCB(const std_msgs::Bool::ConstPtr& msg);
 
-    //! Callback enable/disable auto-storing data after an acquisition starts
-    void autoStoreCB(const std_msgs::Bool::ConstPtr& msg);
-
     /*!
       \brief Callback for resetting the force read.
       \warning might not be used while recording the data.
      */
     void resetCB(const std_msgs::Empty::ConstPtr& msg);
+
     //! whether a recording is requested or not
     bool start_recording_;
 };

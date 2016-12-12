@@ -44,9 +44,6 @@ class optoforce_action_server : public optoforce_node {
     //! Start transmision trough topics, only enable the flag
     void run (const ActionServer::GoalConstPtr& goal);
 
-    //void executeCB(const actionlib::SimpleActionServer<optoforce_ros::OptoForceAction>::GoalConstPtr& goal);
-    void executeCB(const ActionServer::GoalConstPtr& goal);
-
   private:
 
     ActionServer* as_;

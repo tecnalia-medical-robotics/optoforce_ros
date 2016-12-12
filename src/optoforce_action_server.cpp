@@ -12,15 +12,6 @@
  */
 #include "optoforce_action_server.h"
 
-// todo(Asier) consider removing this code if not needed.
-/*
-optoforce_action_server::optoforce_action_server(std::string name) :
-  as_(nh_, name, boost::bind(&optoforce_action_server::executeCB, this, _1),false),
-  action_name_(name)
-{
-  as_.start();
-}
-*/
 optoforce_action_server::optoforce_action_server(std::string name) : as_name_(name),
                                                                      as_(NULL)
 {
@@ -28,7 +19,6 @@ optoforce_action_server::optoforce_action_server(std::string name) : as_name_(na
 
 void optoforce_action_server::add_ros_interface()
 {
-  //as_ = new ActionServer(nh_, as_name_, boost::bind(&optoforce_action_server::executeCB, this, _1),false);
   as_ = new ActionServer(nh_, as_name_, boost::bind(&optoforce_action_server::run, this, _1),false);
   as_->start();
   ROS_INFO("[add_ros_interface] actinlib started");
@@ -119,47 +109,6 @@ void optoforce_action_server::run(const ActionServer::GoalConstPtr& goal)
   result_.result = 1;
   as_->setSucceeded(result_);
   ROS_INFO("[optoforce_action_server::run] Finish loop");
-}
-
-// todo(Asier) reconsider the presence of that function that is just empty
-void optoforce_action_server::executeCB(const actionlib::SimpleActionServer<optoforce_ros::OptoForceAction>::GoalConstPtr& goal)
-{
-  /*
-  ROS_INFO("[optoforce_action_server::executeCB] Enter executeCB");
-
-  int it = 0;
-
-  ros::Rate timer(goal->freq); // 1Hz timer
-  geometry_msgs::WrenchStamped wrench;
-  std::vector< std::vector<float> > latest_samples;
-
-  while (it < goal->duration)
-  {
-    //ROS_INFO("[optoforce_action_server::executeCB] Running executeCB");
-    if (as_->isPreemptRequested()){
-       ROS_WARN("goal cancelled!");
-       result_.result = 0;
-       as_->setAborted(result_); // tell the client we have given up on this goal; send the result message as well
-       return; // done with callback
-    }
-    std::vector<float> data;
-    data.push_back(0.2);
-    data.push_back(0.3);
-
-    latest_samples.clear();
-    force_acquisition_->getData(latest_samples);
-
-    //ROS_INFO_STREAM("force: " << wrench_[0].wrench.force.z);
-
-    feedback_.wrench = data;
-
-    as_->publishFeedback(feedback_); // send feedback to the action client that requested this goal
-
-    it++;
-    timer.sleep();
-  }
-*/
-
 }
 
 // Inherited virtual method from optoforce_node

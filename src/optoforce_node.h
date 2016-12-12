@@ -35,17 +35,16 @@ class optoforce_node {
     //! Read Parameters from parameter server
     int configure();
 
-    //! run
-    //! This function must be overwriten by the derived class
-    //! Start transmision of data independently of the interface
-    virtual int run();
-
     //! Flag that enables publishing
     bool publish_enable_;
 
     //! Flag that enables storing data
     bool storeData_enable_;
     bool storeData_cmd_;
+
+    //! This function must be overwriten by the derived class
+    //! Start transmision of data independently of the interface
+    virtual int run(){};
 
     //! This function must be overwriten by the derived class
     //! Start transmision of data independently of the interface
@@ -79,6 +78,7 @@ class optoforce_node {
     struct SensorConfig {
       std::string name;
       int speed;
+      int filter;
       std::vector<float> calib;
       std::vector<int> F_trans;
       std::vector<int> T_trans;
@@ -96,7 +96,6 @@ class optoforce_node {
     int acquisition_rate_;
 
     //! Sensor's transmission frequency
-    // todo(Asier) this flag is never used. Consider removing
     int transmission_speed_;
 
     //! Sensor Filter
@@ -111,5 +110,6 @@ class optoforce_node {
     std::vector<std::string> ldevice_;
     std::vector<std::vector<float> > lcalib_;
     std::vector<int> lspeed_;
+    std::vector<int> lfilter_;
 
 };

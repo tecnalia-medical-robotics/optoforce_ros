@@ -77,7 +77,7 @@ int optoforce_node::init()
       finish();
     }
   }
-  // Configure Force Sensors Speed
+  // Configure Force Sensors Speed and Filter
   for (int i = 0; i < connectedDAQs_; ++i)
   {
     if (!force_acquisition_->setSensorSpeed(lspeed_[i]))
@@ -86,15 +86,22 @@ int optoforce_node::init()
     }
     else
       std::cout << "Correctly setFrequency:  " << lspeed_[i] << std::endl;
+
+    if (!force_acquisition_->setSensorFilter(lfilter_[i]))
+    {
+      std::cerr << "Could not setSensorFilter" << std::endl;
+    }
+    else
+      std::cout << "Correctly setSensorFilter:  " << lfilter_[i] << std::endl;
   }
 
-
+  /*
   // Configure Force Sensors Filter Frequency in all connected devices
   if (!force_acquisition_->setSensorFilter(filter_))
     std::cerr << "Could not setSensorFilter" << std::endl;
   else
     std::cout << "Correctly setSensorFilter:  " << filter_ << std::endl;
-
+*/
 
   // Configure FT Calibration
   for (int i = 0; i < connectedDAQs_; ++i)
@@ -206,6 +213,16 @@ int optoforce_node::configure()
           device_list_[i].speed = 1000;
         }
 
+        // Get Filter
+        if (device_data.hasMember("filter"))
+        {
+          device_list_[i].filter = (int)device_data["filter"];
+        }
+        else
+        {
+          device_list_[i].filter = 15;
+        }
+
         // Get Calibration matrix
         XmlRpc::XmlRpcValue calib_list;
         if (device_data.hasMember("calibration"))
@@ -266,6 +283,8 @@ int optoforce_node::configure()
 
         ldevice_.push_back(device_list_[i].name);
         lspeed_.push_back(device_list_[i].speed);
+        lfilter_.push_back(device_list_[i].filter);
+
 
       }
   }
@@ -277,6 +296,7 @@ int optoforce_node::configure()
     std::cout << "device " << j << std::endl;
     std::cout << "  name: " << device_list_[j].name << std::endl;
     std::cout << "  speed: " << device_list_[j].speed << std::endl;
+    std::cout << "  filter: " << device_list_[j].filter << std::endl;
     std::cout << "  calib: [ ";
     for (int k = 0; k < device_list_[j].calib.size(); k ++)
     {
@@ -302,45 +322,6 @@ int optoforce_node::configure()
   return 0;
 }
 
-int optoforce_node::run()
-{
-
-  std::cout << "[optoforce_node::run] start recording" << std::endl;
-  std::vector< std::vector<float> > latest_samples;
-
-  force_acquisition_->startRecording(num_samples_);
-
-  ros::Rate loop_rate(loop_rate_);
-  while(ros::ok() && (force_acquisition_ != NULL) && force_acquisition_->isRecording())
-  {
-    latest_samples.clear();
-
-    force_acquisition_->getData(latest_samples);
-
-    if (latest_samples.size() == connectedDAQs_)
-    {
-        // todo(Asier) check why isDataValid is not used
-        bool isDataValid = true;
-
-        // Check if all received data's dimension is 6
-        for (int i = 0; i < latest_samples.size(); i++)
-        {
-          if (latest_samples[i].size() == 6)
-            isDataValid = (isDataValid & true);
-          else
-            isDataValid = false;
-        }
-    }
-
-    ros::spinOnce();
-    loop_rate.sleep();
-  }
-  force_acquisition_->stopRecording();
-
-  // finish program
-  finish();
-  return 0;
-}
 // Whatever the recording state is, top it.
 // This way all previously get data will be discarded.
 void optoforce_node::storeStart()
@@ -353,23 +334,3 @@ void optoforce_node::storeStop()
     force_acquisition_->stopRecording();
 
 }
-//int main(int argc, char* argv[])
-//{
-//  ros::init(argc, argv, "optoforce_node");
-//  ROS_INFO_STREAM("Node name is:" << ros::this_node::getName());
-//  //ROS_ERROR_STREAM("Bye");
-
-//  optoforce_node optoforce_node;
-
-//  if (optoforce_node.init() < 0)
-//  {
-//    std::cout << "optoforce_node could not be initialized" << std::endl;
-//  }
-//  else
-//  {
-//    std::cout << "optoforce_node Correctly initialized" << std::endl;
-//    optoforce_node.run();
-//  }
-//  std::cout << "exit main" << std::endl;
-//  return 1;
-//}

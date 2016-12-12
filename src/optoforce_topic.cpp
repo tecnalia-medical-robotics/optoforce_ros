@@ -38,44 +38,31 @@ void optoforce_topic::add_ros_interface()
 {
   ROS_INFO_STREAM("[optoforce_ros_interface]connectedDAQs_" << connectedDAQs_);
 
-  // Create Publishers
-  for (int i = 0; i < connectedDAQs_; i++)
+  // Initialize Publishers and Subscribers
+  wrench_pub_.clear();
+  subs_.clear();
+
+  for (int i = 0; i < device_list_.size(); i++)
   {
       std::string publisher_name = "wrench_" + device_list_[i].name;
-      wrench_pub_[i] = nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1);
+      wrench_pub_.push_back(nh_.advertise<geometry_msgs::WrenchStamped>(publisher_name, 1));
   }
 
-  subs_[0] = nh_.subscribe("start_publishing",
+
+  subs_.push_back( nh_.subscribe("start_publishing",
                            1,
                            &optoforce_topic::startPublishingCB,
-                           this);
+                           this));
 
-  subs_[1] = nh_.subscribe("start_new_acquisition",
-                           1,
-                           &optoforce_topic::startRecordingCB,
-                           this);
-  subs_[2] = nh_.subscribe("auto_store",
-                           1,
-                           &optoforce_topic::autoStoreCB,
-                           this);
-  subs_[3] = nh_.subscribe("reset",
+  subs_.push_back(nh_.subscribe("start_new_acquisition",
+                                1,
+                                &optoforce_topic::startRecordingCB,
+                                this));
+
+  subs_.push_back(nh_.subscribe("reset",
                            1,
                            &optoforce_topic::resetCB,
-                           this);
-}
-
-// todo(Asier) consider remobing the commented code.
-// Callback enable/disable publishing topic
-void optoforce_topic::autoStoreCB(const std_msgs::Bool::ConstPtr& msg)
-{
-  /*
-  ROS_INFO_STREAM("[optoforce_topic::autoStoreCB] data: " << int(msg->data));
-
-  if (msg->data == true)
-    force_acquisition_->setAutoStore(true);
-  else
-    force_acquisition_->setAutoStore(false);
-   */
+                           this));
 }
 
 // Calback enable/disable publishing topic
@@ -151,17 +138,13 @@ int optoforce_topic::run()
 
   while(ros::ok())
   {
-    // todo (Asier) why are you defining a local publish_enable that is not used?
-    bool publish_enable = false;
     // It is assumed that, callback function enables acquisition
     if(publish_enable_ && force_acquisition_->isReading() )
     {
       latest_samples.clear();
-      //std::cout << "**************************************size: " << latest_samples.size() << std::endl;
+
       force_acquisition_->getData(latest_samples);
-      //std::cout << "**************************************size: " << latest_samples.size() << std::endl;;
-      //std::cout << "**************************************size: " << latest_samples[0].size() << std::endl;;
-      //std::cout << "**************************************size: " << latest_samples[1].size() << std::endl;;
+
       if ( latest_samples.size() == connectedDAQs_)
       {
         for (int i = 0; i < connectedDAQs_; i++)
