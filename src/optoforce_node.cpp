@@ -143,8 +143,13 @@ int optoforce_node::init()
   storeData_enable_ = false;
   storeData_cmd_ = false;
 
-  // By default DO publish
-  publish_enable_ = false;
+  if (publish_enable_)
+  {
+    if (!force_acquisition_->isReading())
+    {
+      force_acquisition_->startReading();
+    }
+  }
 
   return 0;
 }
@@ -161,6 +166,8 @@ int optoforce_node::configure()
   nh_.param("num_samples", num_samples_, 600000); // Maximun Number of Samples to be stored. Default 600000
 
   nh_.param<std::string>("filename", filename_, "/tmp/optoforce_node"); // Loop Rate in Hz
+
+  nh_.param("publish", publish_enable_, true); // Automatically publish data
 
   XmlRpc::XmlRpcValue devices_list;
   if (!nh_.getParam("devices", devices_list))
