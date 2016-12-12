@@ -125,6 +125,8 @@ void optoforce_topic::startRecordingCB(const std_msgs::Bool::ConstPtr& msg)
 // Calback to reset (to 0) the optoforce sensors readings
 void optoforce_topic::resetCB(const std_msgs::Empty::ConstPtr& msg)
 {
+  ROS_INFO("[optoforce_topic::reset] ");
+
   force_acquisition_->setZeroAll();
 }
 
