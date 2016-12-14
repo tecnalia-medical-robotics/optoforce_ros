@@ -4,7 +4,8 @@
  * @date   2016
  *
  * Copyright 2016 Tecnalia Research & Innovation.
- * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ * Distributed under the GNU GPL v3.
+ * For full terms see https://www.gnu.org/licenses/gpl.txt
  *
  * @brief OptoForce ROS node with an interface through topics.
  *        The program inherits optoforce_node, which:
@@ -24,11 +25,10 @@
 
 #include "optoforce_node.h"
 #include "std_msgs/Bool.h"
+#include "std_msgs/Empty.h"
 
 class optoforce_topic : public optoforce_node {
-
   public:
-
     //! Constructor
     //! Initialize ROS Publishers and Subscribers
     optoforce_topic();
@@ -45,7 +45,6 @@ class optoforce_topic : public optoforce_node {
     //! Start transmision trough topics, only enable the flag
     int run ();
 
-
     //! Inherited virtual method from optoforce_node
     //! Start transmision trough topics, only enable the flag
     void transmitStart ();
@@ -56,24 +55,27 @@ class optoforce_topic : public optoforce_node {
 
   private:
     //! Wrench Publisher
-    ros::Publisher wrench_pub_[2];
+    //! this will not work if we have more than 2 devices connected
+    std::vector<ros::Publisher> wrench_pub_;
 
     //! ROS Subscribers
     //! subs_[0]: start_publishing
     //! subs_[1]: start_new_acquisition
-    //! subs_[2]: auto_store
-    ros::Subscriber subs_[3];
+    //! subs_[2]: reset Force and Torque
+    std::vector<ros::Subscriber> subs_;
 
-    //! Calback enable/disable publishing topic
+    //! Callback enable/disable publishing topic
     void startPublishingCB(const std_msgs::Bool::ConstPtr& msg);
 
-    //! Calback enable/disable new acquisition
+    //! Callback enable/disable new acquisition
     void startRecordingCB(const std_msgs::Bool::ConstPtr& msg);
 
-    //! Calback enable/disable auto-storing data after an acquisition starts
-    void autoStoreCB(const std_msgs::Bool::ConstPtr& msg);
+    /*!
+      \brief Callback for resetting the force read.
+      \warning might not be used while recording the data.
+     */
+    void resetCB(const std_msgs::Empty::ConstPtr& msg);
 
+    //! whether a recording is requested or not
     bool start_recording_;
-
-
 };

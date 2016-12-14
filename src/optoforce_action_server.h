@@ -4,7 +4,8 @@
  * @date   2016
  *
  * Copyright 2016 Tecnalia Research & Innovation.
- * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ * Distributed under the GNU GPL v3.
+ * For full terms see https://www.gnu.org/licenses/gpl.txt
  *
  * @brief Basic OptoForce ROS action server
  *
@@ -43,17 +44,15 @@ class optoforce_action_server : public optoforce_node {
     //! Start transmision trough topics, only enable the flag
     void run (const ActionServer::GoalConstPtr& goal);
 
-    //void executeCB(const actionlib::SimpleActionServer<optoforce_ros::OptoForceAction>::GoalConstPtr& goal);
-    void executeCB(const ActionServer::GoalConstPtr& goal);
-
   private:
 
     ActionServer* as_;
     std::string as_name_;
 
-    optoforce_ros::OptoForceGoal goal_; // goal message, received from client
-    optoforce_ros::OptoForceResult result_; // put results here, to be sent back to the client when done w/ goal
-    optoforce_ros::OptoForceFeedback feedback_; // for feedback
-
-
+    //! goal message, received from client
+    optoforce_ros::OptoForceGoal goal_;
+    //! put results here, to be sent back to the client when done w/ goal
+    optoforce_ros::OptoForceResult result_;
+    //! for feedback
+    optoforce_ros::OptoForceFeedback feedback_;
 };

@@ -4,7 +4,8 @@
  * @date   2016
  *
  * Copyright 2016 Tecnalia Research & Innovation.
- * Distributed under the GNU GPL v3. For full terms see https://www.gnu.org/licenses/gpl.txt
+ * Distributed under the GNU GPL v3.
+ * For full terms see https://www.gnu.org/licenses/gpl.txt
  *
  * @brief Basic ROS node. Add an interface to OptoForce driver
  *          Initialize ROS node
@@ -14,9 +15,18 @@
 
 #include "optoforce_node.h"
 
-optoforce_node::optoforce_node(): nh_("~")
+optoforce_node::optoforce_node(): nh_("~"),
+                                  publish_enable_(false),
+                                  storeData_enable_(false),
+                                  storeData_cmd_(false),
+                                  force_acquisition_(NULL),
+                                  connectedDAQs_(0),
+                                  loop_rate_(100),
+                                  acquisition_rate_(1000),
+                                  transmission_speed_(100),
+                                  filter_(15),
+                                  num_samples_(600000)
 {
-
 }
 
 optoforce_node::~optoforce_node()
@@ -67,7 +77,7 @@ int optoforce_node::init()
       finish();
     }
   }
-  // Configure Force Sensors Speed
+  // Configure Force Sensors Speed and Filter
   for (int i = 0; i < connectedDAQs_; ++i)
   {
     if (!force_acquisition_->setSensorSpeed(lspeed_[i]))
@@ -76,15 +86,22 @@ int optoforce_node::init()
     }
     else
       std::cout << "Correctly setFrequency:  " << lspeed_[i] << std::endl;
+
+    if (!force_acquisition_->setSensorFilter(lfilter_[i]))
+    {
+      std::cerr << "Could not setSensorFilter" << std::endl;
+    }
+    else
+      std::cout << "Correctly setSensorFilter:  " << lfilter_[i] << std::endl;
   }
 
-
+  /*
   // Configure Force Sensors Filter Frequency in all connected devices
   if (!force_acquisition_->setSensorFilter(filter_))
     std::cerr << "Could not setSensorFilter" << std::endl;
   else
     std::cout << "Correctly setSensorFilter:  " << filter_ << std::endl;
-
+*/
 
   // Configure FT Calibration
   for (int i = 0; i < connectedDAQs_; ++i)
@@ -111,7 +128,8 @@ int optoforce_node::init()
   force_acquisition_->setZeroAll();
 
   // Set Acquisition Frequency
-  // This frequency determines how often we get a new data. Independently from Sensor Transmission Rate
+  // This frequency determines how often we get a new data.
+  // Independently from Sensor Transmission Rate
   force_acquisition_->setAcquisitionFrequency(acquisition_rate_);
 
   // Set Filename to Store Data
@@ -125,10 +143,13 @@ int optoforce_node::init()
   storeData_enable_ = false;
   storeData_cmd_ = false;
 
-  // By default DO publish
-  puplish_enable_ = false;
-
-
+  if (publish_enable_)
+  {
+    if (!force_acquisition_->isReading())
+    {
+      force_acquisition_->startReading();
+    }
+  }
 
   return 0;
 }
@@ -145,6 +166,8 @@ int optoforce_node::configure()
   nh_.param("num_samples", num_samples_, 600000); // Maximun Number of Samples to be stored. Default 600000
 
   nh_.param<std::string>("filename", filename_, "/tmp/optoforce_node"); // Loop Rate in Hz
+
+  nh_.param("publish", publish_enable_, true); // Automatically publish data
 
   XmlRpc::XmlRpcValue devices_list;
   if (!nh_.getParam("devices", devices_list))
@@ -195,6 +218,16 @@ int optoforce_node::configure()
         else
         {
           device_list_[i].speed = 1000;
+        }
+
+        // Get Filter
+        if (device_data.hasMember("filter"))
+        {
+          device_list_[i].filter = (int)device_data["filter"];
+        }
+        else
+        {
+          device_list_[i].filter = 15;
         }
 
         // Get Calibration matrix
@@ -257,6 +290,8 @@ int optoforce_node::configure()
 
         ldevice_.push_back(device_list_[i].name);
         lspeed_.push_back(device_list_[i].speed);
+        lfilter_.push_back(device_list_[i].filter);
+
 
       }
   }
@@ -268,6 +303,7 @@ int optoforce_node::configure()
     std::cout << "device " << j << std::endl;
     std::cout << "  name: " << device_list_[j].name << std::endl;
     std::cout << "  speed: " << device_list_[j].speed << std::endl;
+    std::cout << "  filter: " << device_list_[j].filter << std::endl;
     std::cout << "  calib: [ ";
     for (int k = 0; k < device_list_[j].calib.size(); k ++)
     {
@@ -289,48 +325,10 @@ int optoforce_node::configure()
   }
 
   filter_ = 15; // in Hz
-  
+
   return 0;
 }
 
-int optoforce_node::run()
-{
-
-  std::cout << "[optoforce_node::run] start recording" << std::endl;
-  std::vector< std::vector<float> > latest_samples;
-
-  force_acquisition_->startRecording(num_samples_);
-
-  ros::Rate loop_rate(loop_rate_);
-  while(ros::ok() && (force_acquisition_ != NULL) && force_acquisition_->isRecording())
-  {
-    latest_samples.clear();
-
-    force_acquisition_->getData(latest_samples);
-
-    if (latest_samples.size() == connectedDAQs_)
-    {
-        bool isDataValid = true;
-
-        // Check if all received data's dimension is 6
-        for (int i = 0; i < latest_samples.size(); i++)
-        {
-          if (latest_samples[i].size() == 6)
-            isDataValid = (isDataValid & true);
-          else
-            isDataValid = false;
-        }
-    }
-
-    ros::spinOnce();
-    loop_rate.sleep();
-  }
-  force_acquisition_->stopRecording();
-
-  // finish program
-  finish();
-  return 0;
-}
 // Whatever the recording state is, top it.
 // This way all previously get data will be discarded.
 void optoforce_node::storeStart()
@@ -343,23 +341,3 @@ void optoforce_node::storeStop()
     force_acquisition_->stopRecording();
 
 }
-//int main(int argc, char* argv[])
-//{
-//  ros::init(argc, argv, "optoforce_node");
-//  ROS_INFO_STREAM("Node name is:" << ros::this_node::getName());
-//  //ROS_ERROR_STREAM("Bye");
-
-//  optoforce_node optoforce_node;
-
-//  if (optoforce_node.init() < 0)
-//  {
-//    std::cout << "optoforce_node could not be initialized" << std::endl;
-//  }
-//  else
-//  {
-//    std::cout << "optoforce_node Correctly initialized" << std::endl;
-//    optoforce_node.run();
-//  }
-//  std::cout << "exit main" << std::endl;
-//  return 1;
-//}
