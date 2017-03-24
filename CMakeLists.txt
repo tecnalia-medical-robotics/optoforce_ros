@@ -77,3 +77,9 @@ target_link_libraries(optoforce_action_client_example ${catkin_LIBRARIES})
 add_dependencies(optoforce_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_dependencies(optoforce_action_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 add_dependencies(optoforce_action_client_example ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+install(TARGETS optoforce_node optoforce_action_node optoforce_action_client_example
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
